@@ -1,5 +1,5 @@
 name := "MultiConsumer"
-organization := "DroneCop"
+organization := "droneCop"
 
 version := "0.1"
 

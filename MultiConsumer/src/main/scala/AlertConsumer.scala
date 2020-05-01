@@ -14,11 +14,11 @@ import java.util.Properties
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-import droneCop.Managers.ProducerManager
 import droneCop.Managers.ConsumerManager
+import droneCop.Managers.ProducerManager
 
-object ConsumerDroneStream extends App {
-  val TOPIC = "DroneStream"
+object ConsumerAlertStream extends App {
+  val TOPIC = "AlertStream"
   val mainConsumer = ConsumerManager(TOPIC)
 
   val sparkConf = new SparkConf()
@@ -35,25 +35,13 @@ object ConsumerDroneStream extends App {
     parse(jsonStr).extract[Map[String, Any]]
   }
 
-  val alertProd = ProducerManager("AlertStream")
-  val storageProd = ProducerManager("AllStream")
 
   while (true) {
     val records = mainConsumer.consumer.poll(500)
     records.asScala.foreach { drone =>
       val md = jsonStrToMap(drone.value())
-      println("New message received from drone number " + md("DroneId"))
-      if (md("Alert") == 1) {
-        println("> " + md("DroneId") + ": This is an alert!")
-        alertProd.send("key", drone.value())
-        storageProd.send("key", drone.value())
-      } else {
-        println("> " + md("DroneId") + ": Normal message")
-        println("> " + md("DroneId") + ": Sent to storage")
-        storageProd.send("key", drone.value())
-      }
+      println("Alert Stream Recieved :", drone.value())
     }
   }
   mainConsumer.consumer.close()
-
 }
