@@ -1,23 +1,43 @@
 import org.apache.kafka.clients.producer._
+import java.util.Properties
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future, Promise}
+object Drone {
+  def main(args: Array[String]): Unit = {
 
+    val TOPIC = "DroneStream"
 
-object Drone{
-    def main (args: Array[String]): Unit = {
-        val props = new Properties()
-        props.put("bootstrap.servers", "localhost:9092")
-        props.put("acks", "all")
-        props.put("retries", 0)
-        props.put("batch.size", 16384)
-        props.put("linger.ms", 1)
-        props.put("buffer.memory", 33554432)
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+    val props = new Properties()
 
-        val producer = new KafkaProducer[String, String](props)
-        
-        producer.send(new ProducerRecord<String, String>("my-topic", "a", "test"))
+    props.put("bootstrap.servers", "localhost:9092")
 
-        producer.close()
+    props.put(
+      "key.serializer",
+      "org.apache.kafka.common.serialization.StringSerializer"
+    )
+    props.put(
+      "value.serializer",
+      "org.apache.kafka.common.serialization.StringSerializer"
+    )
 
+    val producer = new KafkaProducer[String, String](props)
+
+    val droneFt = Future[Unit] {
+      val record = new ProducerRecord(TOPIC, "value", "test")
+      producer.send(record)
+      Thread.sleep(500)
     }
+
+    val futures = Future.sequence(Seq[Future[Unit]](droneFt))
+
+    futures foreach{
+       value => println("Msg sent")
+    }
+    
+    Await.ready(futures, Duration.Inf)
+
+    producer.close()
+
+  }
 }
