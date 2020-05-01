@@ -23,6 +23,7 @@ case class ConsumerManager(topic: String) {
     "value.deserializer",
     "org.apache.kafka.common.serialization.StringDeserializer"
   )
+  kafkaProps.put("group.id", "drone")
   val consumer = new KafkaConsumer[String, String](kafkaProps)
   consumer.subscribe(util.Collections.singletonList(topic))
 }
