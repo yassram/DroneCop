@@ -6,8 +6,10 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import org.json4s.jackson.JsonMethods._
 
+case class DroneMsg(Alert: String)
+
 object Consumer extends App {
-  
+
   val TOPIC = "DroneStream"
 
   val sparkConf = new SparkConf()
@@ -35,22 +37,21 @@ object Consumer extends App {
 
   consumer.subscribe(util.Collections.singletonList(TOPIC))
 
-  while(true){
+  def jsonStrToMap(jsonStr: String): Map[String, Any] = {
+    implicit val formats = org.json4s.DefaultFormats
+    parse(jsonStr).extract[Map[String, Any]]
+  }
+  
+  while (true) {
     val records = consumer.poll(500)
-    records.asScala.foreach{drone =>
-	  //val md = jsonStrToMap(drone.value())
-	  println(drone)
-      //if(df("Alert") == 1){
-        //val record = new ProducerRecord[String, String]("alert_info", "key", r.value())
-        //val record1 = new ProducerRecord[String, String]("storage_info", "key", r.value())
-        //producer.send(record)
-        //producer.send(record1)
-        //println(df("Alert"))
-      // }else{
-      //   val record = new ProducerRecord[String, String]("storage_info", "key", r.value())
-      //   //producer.send(record)
-      //   println("Pas d'alerte")
-      // }
+    records.asScala.foreach { drone =>
+      val md = jsonStrToMap(drone.value())
+      if (md("Alert") == 1) {
+        
+        println(md("Alert"))
+      } else {
+        
+      }
     }
   }
 
