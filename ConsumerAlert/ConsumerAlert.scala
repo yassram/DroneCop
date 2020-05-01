@@ -12,6 +12,9 @@ import java.util.Properties
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
+import javax.mail.internet.InternetAddress
+import com.github.jurajburian.mailer._
+
 case class ConsumerManager(topic: String) {
   val kafkaProps = new Properties()
   kafkaProps.put("bootstrap.servers", "localhost:9092")
@@ -23,7 +26,6 @@ case class ConsumerManager(topic: String) {
     "value.deserializer",
     "org.apache.kafka.common.serialization.StringDeserializer"
   )
-  kafkaProps.put("group.id", "drone")
   val consumer = new KafkaConsumer[String, String](kafkaProps)
   consumer.subscribe(util.Collections.singletonList(topic))
 }
@@ -56,6 +58,12 @@ case class ProducerManager(topic: String) {
 }
 
 object ConsumerAlertStream extends App {
+  //setup mailer
+  val session = (SmtpAddress("smtp.gmail.com", 587) :: SessionFactory()).session(Some("scalayarm@gmail.com"-> "Banane94"))
+  val mailer = Mailer(session)
+
+
+
   val TOPIC = "AlertStream"
   val mainConsumer = ConsumerManager(TOPIC)
 
@@ -79,6 +87,22 @@ object ConsumerAlertStream extends App {
     records.asScala.foreach { drone =>
       val md = jsonStrToMap(drone.value())
       println("Alert Stream Recieved :", drone.value())
+
+      //mail content
+      val content: Content = new Content().text("raw text content part").html("<b>HTML</b> content part")
+      val msg = Message(
+        from = new InternetAddress("scalayarm@gmail.com"),
+        subject = "my subject",
+        content = content,
+        to = Seq(new InternetAddress("amine.heffar@epita.fr")))
+
+      try {
+        mailer.send(msg)
+      }
+      catch {
+        case e: javax.mail.MessagingException => println("PB! ", e)
+      }
+      mailer.close()
     }
   }
   mainConsumer.consumer.close()
