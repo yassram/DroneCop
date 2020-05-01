@@ -35,7 +35,6 @@ object Consumer extends App {
 
   consumer.subscribe(util.Collections.singletonList(TOPIC))
 
-  
   while(true){
     val records = consumer.poll(500)
     records.asScala.foreach{drone =>
@@ -54,4 +53,6 @@ object Consumer extends App {
       // }
     }
   }
+
+  consumer.close()
 }
