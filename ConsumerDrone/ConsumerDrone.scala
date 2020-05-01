@@ -28,8 +28,34 @@ case class ConsumerManager(topic: String) {
   consumer.subscribe(util.Collections.singletonList(topic))
 }
 
+case class ProducerManager(topic: String) {
+  val props = new Properties()
+  props.put("bootstrap.servers", "localhost:9092")
 
-object Consumer extends App {
+  props.put(
+    "key.serializer",
+    "org.apache.kafka.common.serialization.StringSerializer"
+  )
+  props.put(
+    "value.serializer",
+    "org.apache.kafka.common.serialization.StringSerializer"
+  )
+  val producer = new KafkaProducer[String, String](props)
+
+  def send(key: String, value: String) = {
+    val droneFt = Future[Unit] {
+      val record = new ProducerRecord(topic, key, value)
+      producer.send(record)
+      Thread.sleep(500)
+    }
+    val futures = Future.sequence(Seq[Future[Unit]](droneFt))
+    futures foreach { value => println("Msg sent") }
+    Await.ready(futures, Duration.Inf)
+  }
+
+}
+
+object ConsumerDroneStream extends App {
   val TOPIC = "DroneStream"
   val mainConsumer = ConsumerManager(TOPIC)
 
@@ -47,20 +73,22 @@ object Consumer extends App {
     parse(jsonStr).extract[Map[String, Any]]
   }
 
-  //val alertProd = ProducerManager("Alert")
-  //val storageProd = ProducerManager("All")
+  val alertProd = ProducerManager("AlertStream")
+  val storageProd = ProducerManager("AllStream")
 
   while (true) {
     val records = mainConsumer.consumer.poll(500)
     records.asScala.foreach { drone =>
       val md = jsonStrToMap(drone.value())
+      println("Stream principal recieved !")
       if (md("Alert") == 1) {
-        //alertProd.send("key", drone.value())
+        println("pushed in alert !")
+        alertProd.send("key", drone.value())
         println(md("Alert"))
       } else {
-        //storageProd.send("key", drone.value())
+        println("pushed in all !")
+        storageProd.send("key", drone.value())
       }
     }
   }
-
 }
