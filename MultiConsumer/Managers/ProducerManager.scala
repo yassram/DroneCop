@@ -1,4 +1,4 @@
-package droneCop
+package droneCop.Managers
 
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import scala.collection.JavaConverters._

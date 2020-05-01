@@ -14,9 +14,8 @@ import java.util.Properties
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-import droneCop.Managers.Consumer
-
-
+import droneCop.Managers.ProducerManager
+import droneCop.Managers.ConsumerManager
 
 object ConsumerDroneStream extends App {
   val TOPIC = "DroneStream"
