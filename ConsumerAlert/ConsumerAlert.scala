@@ -73,21 +73,13 @@ object ConsumerAlertStream extends App {
     parse(jsonStr).extract[Map[String, Any]]
   }
 
-  //val alertProd = ProducerManager("Alert")
-  //val storageProd = ProducerManager("All")
 
   while (true) {
     val records = mainConsumer.consumer.poll(500)
     records.asScala.foreach { drone =>
       val md = jsonStrToMap(drone.value())
       println("Alert Stream Recieved :", drone.value())
-      
-      // if (md("Alert") == 1) {
-      //   //alertProd.send("key", drone.value())
-      //   println(md("Alert"))
-      // } else {
-      //   //storageProd.send("key", drone.value())
-      // }
     }
   }
+  mainConsumer.consumer.close()
 }

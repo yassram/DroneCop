@@ -81,12 +81,9 @@ object ConsumerAllStream extends App {
     records.asScala.foreach { drone =>
       val md = jsonStrToMap(drone.value())
       println("All Stream Recieved :", drone.value())
-      // if (md("Alert") == 1) {
-      //   //alertProd.send("key", drone.value())
-      //   println(md("Alert"))
-      // } else {
-      //   //storageProd.send("key", drone.value())
-      // }
+
     }
   }
+  mainConsumer.consumer.close()
+
 }

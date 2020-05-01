@@ -84,6 +84,7 @@ object ConsumerDroneStream extends App {
       if (md("Alert") == 1) {
         println("pushed in alert !")
         alertProd.send("key", drone.value())
+        storageProd.send("key", drone.value())
         println(md("Alert"))
       } else {
         println("pushed in all !")
@@ -91,4 +92,6 @@ object ConsumerDroneStream extends App {
       }
     }
   }
+  mainConsumer.consumer.close()
+
 }
