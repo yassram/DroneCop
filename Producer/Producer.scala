@@ -1,0 +1,2 @@
+object Producer extends App {
+}
