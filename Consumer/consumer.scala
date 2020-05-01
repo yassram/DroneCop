@@ -4,6 +4,7 @@ import java.util
 import java.util.Properties
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
+import org.json4s.jackson.JsonMethods._
 
 object Consumer extends App {
   
@@ -19,7 +20,7 @@ object Consumer extends App {
     .getOrCreate()
 
   val kafkaProps = new Properties()
-  kafkaProps.put("bootstrap.servers", "localhost:9213")
+  kafkaProps.put("bootstrap.servers", "localhost:9092")
   kafkaProps.put(
     "key.deserializer",
     "org.apache.kafka.common.serialization.StringDeserializer"
@@ -37,10 +38,9 @@ object Consumer extends App {
   
   while(true){
     val records = consumer.poll(500)
-    //println(records)
-    records.asScala.foreach{r =>
-	  //val df = jsonStrToMap(r.value())
-	  println(r)
+    records.asScala.foreach{drone =>
+	  //val md = jsonStrToMap(drone.value())
+	  println(drone)
       //if(df("Alert") == 1){
         //val record = new ProducerRecord[String, String]("alert_info", "key", r.value())
         //val record1 = new ProducerRecord[String, String]("storage_info", "key", r.value())
