@@ -28,7 +28,6 @@ package Drone {
 
 
       	def toJsonString(): String = {
-	         val jsonDrone: JsValue = Json.parse(
 	            s"""
 	      {
 	        "drone_id" : ${droneId},
@@ -42,9 +41,8 @@ package Drone {
 	          "long" : ${location.y}
 	        },
 	      }
-	      """)
+	      """
 
-	         Json.stringify(jsonDrone)
       	}
 
       	// deltaTime in ms
@@ -55,16 +53,12 @@ package Drone {
 	        battery = battery - (deltaTime * 100) / (30 * 60 * 1000)
 
 
-	        var newAltitude = altitude + pow(-1, r.nextInt(2)) * r.nextDouble(5)
-	        if newAltitude > 10 {
-	        	newAltitude = 6
-	        }
-	        if newAltitude < 3 {
-	        	newAltitude = 5
-	        }
+	        var newAltitude = altitude + pow(-1, r.nextInt(2)) * r.nextDouble()*5
+	        if (newAltitude > 10) { newAltitude = 6 }
+	        if (newAltitude < 3) { newAltitude = 5 }
 
-	        var newX = location.x + pow(-1, r.nextInt(2)) * r.nextDouble(10)
-	        var newY = location.y + pow(-1, r.nextInt(2)) * r.nextDouble(10)
+	        var newX = location.x + pow(-1, r.nextInt(2)) * r.nextDouble()*10
+	        var newY = location.y + pow(-1, r.nextInt(2)) * r.nextDouble()*10
 
 	        // compute speed
 	        speed = sqrt(pow(newX - location.x, 2) + pow(newY - location.y, 2) + pow(newAltitude - altitude, 2)) / deltaTime * 1000
@@ -76,7 +70,7 @@ package Drone {
 	        location = Location(newX, newY)
 	       
 	       	// update temperature
-	        temperature = temperature + + pow(-1, r.nextInt(2)) * r.nextDouble(0.1)
+	        temperature = temperature + + pow(-1, r.nextInt(2)) * r.nextDouble()*0.1
 
 	       	// update timestamp
 	       	timestamp = timestamp + deltaTime 
