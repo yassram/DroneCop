@@ -3,7 +3,7 @@ import scala.math._
 
 package Drone {
 
-	class Drone(val id: Int) {
+	case class Drone(val id: Int) {
 		var droneId: Int = id
 	
 		// time
@@ -28,20 +28,7 @@ package Drone {
 
 
       	def toJsonString(): String = {
-	            s"""
-	      {
-	        "drone_id" : ${droneId},
-	        "timestamp" : ${timestamp},
-	        "battery" : ${battery},
-	        "altitude" : ${altitude},
-	        "temperature" : ${temperature},
-	        "speed": ${speed},
-	        "location" : {
-	          "lat" : ${location.x},
-	          "long" : ${location.y}
-	        },
-	      }
-	      """
+	            s"""{"drone_id" : ${droneId},"timestamp" : ${timestamp},"battery" : ${battery},"altitude" : ${altitude},"temperature" : ${temperature},"speed": ${speed},"location" : {"lat" : ${location.x}, "long" : ${location.y}}}"""
 
       	}
 

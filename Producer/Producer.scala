@@ -75,7 +75,7 @@ object Producer {
       def run() = {
 
       // log foreach drone
-  		drones.map { _.toJsonString() }.foreach { println(_) }
+  		drones.map { _.toJsonString() }.foreach { producerManager.send(_) }
 
   		// update drones
   		drones.foreach { _.update(droneRefreshRate) }
