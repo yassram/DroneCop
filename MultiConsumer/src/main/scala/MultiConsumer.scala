@@ -17,63 +17,8 @@ import droneCop.Managers.ConsumerManager
 import droneCop.Managers.ProducerManager
 import droneCop.Utils.jsonUtils
 
-class AlertThread extends Runnable {
-  override def run() {
-    val alertTopic = "AlertStream"
-    val alertConsumer = ConsumerManager(alertTopic)
-    val jsonUtils = new jsonUtils()
-    while (true) {
-      val records = alertConsumer.consumer.poll(500)
-      records.asScala.foreach { drone =>
-        val md = jsonUtils.jsonStrToMap(drone.value())
-        println("Alert Stream Received :", drone.value())
-      }
-    }
-    alertConsumer.consumer.close()
-  }
-}
-
-class AllThread extends Runnable {
-  override def run() {
-    val allTopic = "AllStream"
-    val allConsumer = ConsumerManager(allTopic)
-    val jsonUtils = new jsonUtils()
-    while (true) {
-      val records = allConsumer.consumer.poll(500)
-      records.asScala.foreach { drone =>
-        val md = jsonUtils.jsonStrToMap(drone.value())
-        println("All Stream Received :", drone.value())
-      }
-    }
-    allConsumer.consumer.close()
-  }
-}
-
 class DroneThread extends Runnable {
-  override def run() {
-    val droneTopic = "DroneAlert"
-    val droneConsumer = ConsumerManager(droneTopic)
-    val jsonUtils = new jsonUtils()
-    val alertProd = ProducerManager("AlertStream")
-    val storageProd = ProducerManager("AllStream")
-    while (true) {
-      val records = droneConsumer.consumer.poll(500)
-      records.asScala.foreach { drone =>
-        val md = jsonUtils.jsonStrToMap(drone.value())
-        println("New message received from drone number " + md("Alert"))
-        if (md("Alert") == 1) {
-          println("> " + md("Alert") + ": This is an alert!")
-          alertProd.send("key", drone.value())
-          storageProd.send("key", drone.value())
-        } else {
-          println("> " + md("Alert") + ": Normal message")
-          println("> " + md("Alert") + ": Sent to storage")
-          storageProd.send("key", drone.value())
-        }
-      }
-    }
-    droneConsumer.consumer.close()
-  }
+  override def run() {}
 }
 
 object MultiConsumer extends App {
@@ -87,11 +32,70 @@ object MultiConsumer extends App {
     .config(sparkConf)
     .getOrCreate()
 
-  var alertThread = new Thread(new AlertThread())
-  var droneThread = new Thread(new DroneThread())
-  var allThread = new Thread(new AllThread())
-  alertThread.start()
-  droneThread.start()
-  allThread.start()
+  val jsonUtils = new jsonUtils()
+
+  val droneTopic = "DroneAlert"
+  val alertTopic = "AlertStream"
+  val allTopic = "AllStream"
+
+  val droneConsumer = ConsumerManager(droneTopic)
+  val alertConsumer = ConsumerManager(alertTopic)
+  val allConsumer = ConsumerManager(allTopic)
+
+  val alertProd = ProducerManager("AlertStream")
+  val storageProd = ProducerManager("AllStream")
+
+  val alertFuture = Future[Unit] {
+    while (true) {
+      val records = alertConsumer.consumer.poll(500)
+      records.asScala.foreach { drone =>
+        val md = jsonUtils.jsonStrToMap(drone.value())
+        println("Alert Stream Received :", drone.value())
+      }
+    }
+  }
+
+  val allFuture = Future[Unit] {
+    while (true) {
+      val records = allConsumer.consumer.poll(500)
+      records.asScala.foreach { drone =>
+        val md = jsonUtils.jsonStrToMap(drone.value())
+        println("New message received from the drone stream")
+        println("> drone : " + md("DroneId") + " message's is now stored")
+        println("---")
+      }
+    }
+  }
+
+  val droneFuture = Future[Unit] {
+    while (true) {
+      val records = droneConsumer.consumer.poll(500)
+      records.asScala.foreach { drone =>
+        val md = jsonUtils.jsonStrToMap(drone.value())
+        println("New message received from drone number " + md("DroneId"))
+        if (md("Alert") == 1) {
+          println("> " + md("DroneId") + ": This is an alert!")
+          print("> " + md("DroneId") + ": Sendind to alert...")
+          alertProd.send("key", drone.value())
+          println("> " + md("DroneId") + ": Sendind to storage...")
+          storageProd.send("key", drone.value())
+          println("---")
+        } else {
+          println("> " + md("DroneId") + ": Normal message")
+          println("> " + md("DroneId") + ": Sendind to storage...")
+          storageProd.send("key", drone.value())
+          println("---")
+        }
+      }
+    }
+  }
+  
+  val futures = Future.sequence(Seq[Future[Unit]](droneFuture))
+
+  Await.ready(futures, Duration.Inf)
+
+  alertConsumer.consumer.close()
+  allConsumer.consumer.close()
+  droneConsumer.consumer.close()
 
 }
