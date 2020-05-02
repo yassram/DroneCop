@@ -46,29 +46,24 @@ object MultiConsumer extends App {
   val storageProd = ProducerManager("AllStream")
 
   val alertFuture = Future[Unit] {
-    while (true) {
       val records = alertConsumer.consumer.poll(500)
       records.asScala.foreach { drone =>
         val md = jsonUtils.jsonStrToMap(drone.value())
         println("Alert Stream Received :", drone.value())
-      }
     }
   }
 
   val allFuture = Future[Unit] {
-    while (true) {
       val records = allConsumer.consumer.poll(500)
       records.asScala.foreach { drone =>
         val md = jsonUtils.jsonStrToMap(drone.value())
         println("New message received from the drone stream")
         println("> drone : " + md("DroneId") + " message's is now stored")
         println("---")
-      }
     }
   }
 
   val droneFuture = Future[Unit] {
-    while (true) {
       val records = droneConsumer.consumer.poll(500)
       records.asScala.foreach { drone =>
         val md = jsonUtils.jsonStrToMap(drone.value())
@@ -86,10 +81,9 @@ object MultiConsumer extends App {
           storageProd.send("key", drone.value())
           println("---")
         }
-      }
     }
   }
-  
+
   val futures = Future.sequence(Seq[Future[Unit]](droneFuture))
 
   Await.ready(futures, Duration.Inf)
