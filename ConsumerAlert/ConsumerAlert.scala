@@ -97,15 +97,14 @@ object ConsumerAlertStream extends App {
     val records = mainConsumer.consumer.poll(500)
     records.asScala.foreach { drone =>
       val md = jsonStrToMap(drone.value())
-      println("Alert Stream Recieved :", drone.value())
-
-      //mail content
-      val content: Content = new Content().text("Hi\n").html(s"<html><body><h1>Hi,\n</h1></body></html>")
+      println("Alert received from drone number " + md("DroneId"))
+      val pos : Map[String,Any] = md("Position").asInstanceOf[Map[String,Any]]
+      val content: Content = new Content().text("Hi\n").html(s"<html><body>" + "<img width='600' src='https://maps.googleapis.com/maps/api/staticmap?center=" + pos("Latitude") + "," + pos("Longitude") + "&zoom=16&scale=1&size=600x300&maptype=roadmap&key=AIzaSyDSIp9pblkkr5nxfRhujeBvVe27JzwHlTM&format=png&visual_refresh=true&markers=size:mid%7Ccolor:0xff0000%7Clabel:%7C" + pos("Latitude") + "," + pos("Longitude") + "'>" + "</body></html>")
       val msg = Message(
         from = new InternetAddress("scalayarm@gmail.com"),
         subject = "my subject",
         content = content,
-        to = Seq(new InternetAddress("amine.heffar@epita.fr")))
+        to = Seq(new InternetAddress("rayane.amrouche@epita.fr")))
 
       try {
         mailer.send(msg)
