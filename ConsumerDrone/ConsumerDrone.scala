@@ -80,17 +80,17 @@ object ConsumerDroneStream extends App {
     val records = mainConsumer.consumer.poll(500)
     records.asScala.foreach { drone =>
       val md = jsonStrToMap(drone.value())
-      println("New message received from drone number " + md("DroneId"))
-      if (md("Alert") == 1) {
-        println("> " + md("DroneId") + ": This is an alert!")
-        print("> " + md("DroneId") + ": Sendind to alert...")
+      println("New message received from drone number " + md("drone_id"))
+      if (md("alert") == 1) {
+        println("> " + md("drone_id") + ": This is an alert!")
+        print("> " + md("drone_id") + ": Sendind to alert...")
         alertProd.send("key", drone.value())
-        println("> " + md("DroneId") + ": Sendind to storage...")
+        println("> " + md("drone_id") + ": Sendind to storage...")
         storageProd.send("key", drone.value())
         println("---")
       } else {
-        println("> " + md("DroneId") + ": Normal message")
-        println("> " + md("DroneId") + ": Sendind to storage...")
+        println("> " + md("drone_id") + ": Normal message")
+        println("> " + md("drone_id") + ": Sendind to storage...")
         storageProd.send("key", drone.value())
         println("---")
       }
