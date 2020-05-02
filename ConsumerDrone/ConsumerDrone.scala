@@ -49,7 +49,7 @@ case class ProducerManager(topic: String) {
       Thread.sleep(500)
     }
     val futures = Future.sequence(Seq[Future[Unit]](droneFt))
-    futures foreach { value => println("Msg sent") }
+    futures foreach { value => println("> Message sent!") }
     Await.ready(futures, Duration.Inf)
   }
 
@@ -83,12 +83,16 @@ object ConsumerDroneStream extends App {
       println("New message received from drone number " + md("DroneId"))
       if (md("Alert") == 1) {
         println("> " + md("DroneId") + ": This is an alert!")
+        print("> " + md("DroneId") + ": Sendind to alert...")
         alertProd.send("key", drone.value())
+        println("> " + md("DroneId") + ": Sendind to storage...")
         storageProd.send("key", drone.value())
+        println("---")
       } else {
         println("> " + md("DroneId") + ": Normal message")
-        println("> " + md("DroneId") + ": Sent to storage")
+        println("> " + md("DroneId") + ": Sendind to storage...")
         storageProd.send("key", drone.value())
+        println("---")
       }
     }
   }
