@@ -4,7 +4,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future, Promise}
 
-
 object Drone {
   def main(args: Array[String]): Unit = {
 
@@ -26,16 +25,21 @@ object Drone {
     val producer = new KafkaProducer[String, String](props)
 
     val droneFt = Future[Unit] {
-      val record = new ProducerRecord(TOPIC, "key", """{"Alert": 1, "DroneId" : 213}""")
+      val record = new ProducerRecord(TOPIC, "key", """
+      {"Alert": 1,
+      "DroneId" : 213,
+      "Position": {
+            "Longitude": 9.96233,
+            "Latitude": 49.80404
+        }
+      }""")
       producer.send(record)
       Thread.sleep(500)
     }
 
     val futures = Future.sequence(Seq[Future[Unit]](droneFt))
 
-    futures foreach{
-       value => println("Msg sent")
-    }
+    futures foreach { value => println("Msg sent") }
 
     Await.ready(futures, Duration.Inf)
 
