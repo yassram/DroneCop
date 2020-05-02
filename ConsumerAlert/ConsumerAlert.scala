@@ -26,6 +26,10 @@ case class ConsumerManager(topic: String) {
     "value.deserializer",
     "org.apache.kafka.common.serialization.StringDeserializer"
   )
+  kafkaProps.put(
+    "group.id",
+    "drone"
+  )
   val consumer = new KafkaConsumer[String, String](kafkaProps)
   consumer.subscribe(util.Collections.singletonList(topic))
 }
@@ -42,6 +46,7 @@ case class ProducerManager(topic: String) {
     "value.serializer",
     "org.apache.kafka.common.serialization.StringSerializer"
   )
+
   val producer = new KafkaProducer[String, String](props)
 
   def send(key: String, value: String) = {
