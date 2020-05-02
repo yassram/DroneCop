@@ -26,7 +26,7 @@ object Drone {
     val producer = new KafkaProducer[String, String](props)
 
     val droneFt = Future[Unit] {
-      val record = new ProducerRecord(TOPIC, "key", """{"Alert": 1}""")
+      val record = new ProducerRecord(TOPIC, "key", """{"Alert": 1, "DroneId" : 213}""")
       producer.send(record)
       Thread.sleep(500)
     }
