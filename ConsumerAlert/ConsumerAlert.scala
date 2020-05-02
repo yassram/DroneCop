@@ -15,6 +15,9 @@ import scala.concurrent.duration._
 import javax.mail.internet.InternetAddress
 import com.github.jurajburian.mailer._
 
+case class Location(lat: Double, long: Double)
+case class DroneJson(droneId: Int, timestamp: Long, altitude: Double, temperature: Double, location: Location, speed: Double, battery: Double)
+
 case class ConsumerManager(topic: String) {
   val kafkaProps = new Properties()
   kafkaProps.put("bootstrap.servers", "localhost:9092")
@@ -87,19 +90,18 @@ object ConsumerAlertStream extends App {
     .config(sparkConf)
     .getOrCreate()
 
-  def jsonStrToMap(jsonStr: String): Map[String, Any] = {
+  def jsonStrToMap(jsonStr: String): DroneJson = {
     implicit val formats = org.json4s.DefaultFormats
-    parse(jsonStr).extract[Map[String, Any]]
+    parse(jsonStr).camelizeKeys.extract[DroneJson]
   }
 
 
   while (true) {
     val records = mainConsumer.consumer.poll(500)
-    records.asScala.foreach { drone =>
-      val md = jsonStrToMap(drone.value())
-      println("Alert received from drone number " + md("DroneId"))
-      val pos : Map[String,Any] = md("Position").asInstanceOf[Map[String,Any]]
-      val content: Content = new Content().text("Hi\n").html(s"<html><body>" + "<img width='600' src='https://maps.googleapis.com/maps/api/staticmap?center=" + pos("Latitude") + "," + pos("Longitude") + "&zoom=16&scale=1&size=600x300&maptype=roadmap&key=AIzaSyDSIp9pblkkr5nxfRhujeBvVe27JzwHlTM&format=png&visual_refresh=true&markers=size:mid%7Ccolor:0xff0000%7Clabel:%7C" + pos("Latitude") + "," + pos("Longitude") + "'>" + "</body></html>")
+    records.asScala.foreach { d =>
+      val drone = jsonStrToMap(d.value())
+      println("Alert received from drone number " + drone.droneId)
+      val content: Content = new Content().text("Hi\n").html(s"<html><body>" + "<img width='600' src='https://maps.googleapis.com/maps/api/staticmap?center=" + drone.location.lat + "," + drone.location.long + "&zoom=16&scale=1&size=600x300&maptype=roadmap&key=AIzaSyDSIp9pblkkr5nxfRhujeBvVe27JzwHlTM&format=png&visual_refresh=true&markers=size:mid%7Ccolor:0xff0000%7Clabel:%7C" + drone.location.lat + "," + drone.location.long + "'>" + "</body></html>")
       val msg = Message(
         from = new InternetAddress("scalayarm@gmail.com"),
         subject = "my subject",
