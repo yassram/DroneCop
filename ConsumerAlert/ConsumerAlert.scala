@@ -64,8 +64,14 @@ case class ProducerManager(topic: String) {
 
 object ConsumerAlertStream extends App {
   //setup mailer
-  val session = (SmtpAddress("smtp.gmail.com", 587) :: SessionFactory()).session(Some("scalayarm@gmail.com"-> "Banane94"))
+  val session = (SmtpAddress("smtp.gmail.com", 587) :: 
+        Property("mail.smtp.auth", "true") ::
+        Property("mail.smtp.starttls.enable", "true") ::
+        Property("mail.smtp.host", "smtp.gmail.com") ::
+        Property("mail.smtp.port", "587") ::
+        SessionFactory()).session(Some("scalayarm@gmail.com" -> "Banane94"))
   val mailer = Mailer(session)
+  
 
 
 
@@ -94,7 +100,7 @@ object ConsumerAlertStream extends App {
       println("Alert Stream Recieved :", drone.value())
 
       //mail content
-      val content: Content = new Content().text("raw text content part").html("<b>HTML</b> content part")
+      val content: Content = new Content().text("Hi\n").html(s"<html><body><h1>Hi,\n</h1></body></html>")
       val msg = Message(
         from = new InternetAddress("scalayarm@gmail.com"),
         subject = "my subject",
