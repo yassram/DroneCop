@@ -12,6 +12,9 @@ import java.util.Properties
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
+case class Location(lat: Double, long: Double)
+case class DroneJson(droneId: Int, timestamp: Long, altitude: Double, temperature: Double, location: Location, speed: Double, battery: Double)
+
 case class ConsumerManager(topic: String) {
   val kafkaProps = new Properties()
   kafkaProps.put("bootstrap.servers", "localhost:9092")
@@ -68,9 +71,9 @@ object ConsumerDroneStream extends App {
     .config(sparkConf)
     .getOrCreate()
 
-  def jsonStrToMap(jsonStr: String): Map[String, Any] = {
+  def jsonStrToMap(jsonStr: String): DroneJson = {
     implicit val formats = org.json4s.DefaultFormats
-    parse(jsonStr).extract[Map[String, Any]]
+    parse(jsonStr).camelizeKeys.extract[DroneJson]
   }
 
   val alertProd = ProducerManager("AlertStream")
@@ -78,20 +81,20 @@ object ConsumerDroneStream extends App {
 
   while (true) {
     val records = mainConsumer.consumer.poll(500)
-    records.asScala.foreach { drone =>
-      val md = jsonStrToMap(drone.value())
-      println("New message received from drone number " + md("drone_id"))
-      if (md("alert") == 1) {
-        println("> " + md("drone_id") + ": This is an alert!")
-        print("> " + md("drone_id") + ": Sendind to alert...")
-        alertProd.send("key", drone.value())
-        println("> " + md("drone_id") + ": Sendind to storage...")
-        storageProd.send("key", drone.value())
+    records.asScala.foreach { d =>
+      val drone : DroneJson = jsonStrToMap(d.value())
+      println("New message received from drone number " + drone.droneId)
+      if (drone.battery == 1) {
+        println("> " + drone.droneId + ": This is an alert!")
+        print("> " + drone.droneId + ": Sendind to alert...")
+        alertProd.send("key", d.value())
+        println("> " + drone.droneId + ": Sendind to storage...")
+        storageProd.send("key", d.value())
         println("---")
       } else {
-        println("> " + md("drone_id") + ": Normal message")
-        println("> " + md("drone_id") + ": Sendind to storage...")
-        storageProd.send("key", drone.value())
+        println("> " + drone.droneId + ": Normal message")
+        println("> " + drone.droneId + ": Sendind to storage...")
+        storageProd.send("key", d.value())
         println("---")
       }
     }
