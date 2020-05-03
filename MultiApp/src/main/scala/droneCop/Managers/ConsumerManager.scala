@@ -14,7 +14,7 @@ import java.util.Properties
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import java.util.concurrent.{ExecutorService, Executors}
-//import droneCop.Utils.jsonUtils
+
 class ConsumerManager(topic: String) {
 
   val kafkaProps = new Properties()
