@@ -13,8 +13,10 @@ import scala.concurrent.{Await, Future, Promise}
 import java.util.Properties
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import java.util.concurrent.{ExecutorService, Executors}
+//import droneCop.Utils.jsonUtils
+class ConsumerManager(topic: String) {
 
-case class ConsumerManager(topic: String) {
   val kafkaProps = new Properties()
   kafkaProps.put("bootstrap.servers", "localhost:9092")
   kafkaProps.put(
@@ -27,5 +29,17 @@ case class ConsumerManager(topic: String) {
   )
   kafkaProps.put("group.id", "drone")
   val consumer = new KafkaConsumer[String, String](kafkaProps)
-  consumer.subscribe(util.Collections.singletonList(topic))
+
+  def shutdown() = {
+    if (consumer != null)
+      consumer.close()
+  }
+
+  def subscribe() {
+    consumer.subscribe(util.Collections.singletonList(topic))
+  }
+
+  def run(callback: () => Unit) {
+    callback()
+  }
 }

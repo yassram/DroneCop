@@ -1,10 +1,10 @@
 
 package droneCop.Utils
 import org.json4s.jackson.JsonMethods._
-
+import droneCop.Drone.DroneJson
 case class jsonUtils() {
-def jsonStrToMap(jsonStr: String): Map[String, Any] = {
+def json2Drone(jsonStr: String): DroneJson = {
     implicit val formats = org.json4s.DefaultFormats
-    parse(jsonStr).extract[Map[String, Any]]
+    parse(jsonStr).camelizeKeys.extract[DroneJson]
   }
 }
