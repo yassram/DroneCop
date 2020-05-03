@@ -7,6 +7,7 @@ case class DroneJson(
     timestamp: Long,
     altitude: Double,
     temperature: Double,
+    alert: Int,
     location: Location,
     speed: Double,
     battery: Double
@@ -30,12 +31,14 @@ case class Drone(val id: Int) {
   // battery in percentage
   var battery: Double = 100
 
+  var alert: Int = 0
+
   // Coordinates
   case class Location(x: Double, y: Double)
   var location = Location(0, 0)
 
   def toJsonString(): String = {
-    s"""{"drone_id" : ${droneId},"timestamp" : ${timestamp},"battery" : ${battery},"altitude" : ${altitude},"temperature" : ${temperature},"speed": ${speed},"location" : {"lat" : ${location.x}, "long" : ${location.y}}}"""
+    s"""{"drone_id" : ${droneId},"timestamp" : ${timestamp},"battery" : ${battery},"altitude" : ${altitude},"temperature" : ${temperature},"speed": ${speed}, "alert": ${alert}, "location" : {"lat" : ${location.x}, "long" : ${location.y}}}"""
 
   }
 
@@ -45,6 +48,9 @@ case class Drone(val id: Int) {
 
     // update battery
     battery = battery - (deltaTime * 100) / (30 * 60 * 1000)
+
+    //alert random
+    alert = if (r.nextInt(100) == 0) 1 else 0
 
     var newAltitude = altitude + pow(-1, r.nextInt(2)) * r.nextDouble() * 5
     if (newAltitude > 10) { newAltitude = 6 }

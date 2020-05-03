@@ -47,7 +47,7 @@ object ConsumerDroneStream extends App {
       val drone: DroneJson = jsonUtils.json2Drone(d.value())
       println("New message received from drone number " + drone.droneId)
       msgFromDrone(drone.droneId, "📍 - lat:" + drone.location.lat + ", long:" + drone.location.long + "🗺")
-      if (drone.battery == 1) {
+      if (drone.alert == 1) {
         msgFromDrone(drone.droneId, "Alert!!!")
         msgFromDrone(drone.droneId, "Alert redirected to alert stream...")
         alertProd.send(d.value())
@@ -56,7 +56,7 @@ object ConsumerDroneStream extends App {
         println("---")
       } else {
         msgFromDrone(drone.droneId, "Normal Message.")
-        msgFromDrone(drone.droneId, "Alert redirected to storage stream...")
+        msgFromDrone(drone.droneId, "Normal message redirected to storage stream...")
         storageProd.send(d.value())
         println("---")
       }
