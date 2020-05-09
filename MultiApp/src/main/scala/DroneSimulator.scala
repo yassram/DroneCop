@@ -1,12 +1,14 @@
+package droneCop
+
 import org.apache.kafka.clients.producer._
 import java.util.Properties
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Promise}
-import droneCop.Drone.Drone
+import droneCop.Drone._
 import droneCop.Managers.ProducerManager
 
-object Producer {
+object DroneSimulator {
 
   def main(args: Array[String]): Unit = {
 
