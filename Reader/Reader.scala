@@ -1,20 +1,31 @@
-import org.apache.kafka.clients.consumer.KafkaConsumer
-import scala.collection.JavaConverters._
-import java.util
-import java.util.Properties
-import org.apache.spark.SparkConf
-import org.apache.spark.sql.SparkSession
-import org.json4s.jackson.JsonMethods._
-import org.apache.kafka.clients.producer._
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
-import scala.concurrent.{Await, Future, Promise}
-import java.util.Properties
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
-
-import javax.mail.internet.InternetAddress
-import com.github.jurajburian.mailer._
+package com.tp.spark.core
+import org.apache.spark.sql.functions._
+import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.log4j.{Level, Logger}
 
 object Reader extends App {
-  println("Reading...")
+
+
+
+    val pathToFile = "/Users/yassram/Documents/school/ing2/scala-spark/pr/DroneCop/Reader/file.csv"
+
+	val conf = new SparkConf()
+                        .setAppName("Wordcount")
+                        .setMaster("local[*]") // here local mode. And * means you will use as much as you have cores.
+    
+    val rootLogger = Logger.getRootLogger()
+    rootLogger.setLevel(Level.ERROR)
+
+    val ss = SparkSession.builder()
+        .config(conf)
+        .getOrCreate()
+
+    val df = ss.read.format("csv")
+                    .option("sep", ",")
+                    .option("inferSchema", "true")
+                    .option("header", "true")
+                    .load(pathToFile)
+
+    //println(df.groupBy("Plate ID").count().orderBy(desc("count")).show(2))
 }
