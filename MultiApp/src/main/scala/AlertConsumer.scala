@@ -1,3 +1,5 @@
+package droneCop
+
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import scala.collection.JavaConverters._
 import java.util
@@ -19,9 +21,9 @@ import droneCop.Managers.ConsumerManager
 import droneCop.Utils.jsonUtils
 import droneCop.Drone.DroneJson
 
-object ConsumerAlertStream extends App {
+object AlertConsumer extends App {
 
-  def main(args: Array[String]): Unit = {
+  override def main(args: Array[String]): Unit = {
 
     if (args.length < 3) {
       println(
@@ -42,15 +44,6 @@ object ConsumerAlertStream extends App {
 
     val TOPIC = "AlertStream"
     val mainConsumer = ConsumerManager(TOPIC)
-
-    val sparkConf = new SparkConf()
-      .setAppName("Spark")
-      .setMaster("local[*]")
-
-    val sparkSession = SparkSession
-      .builder()
-      .config(sparkConf)
-      .getOrCreate()
 
     def jsonStrToMap(jsonStr: String): DroneJson = {
       implicit val formats = org.json4s.DefaultFormats
