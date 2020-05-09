@@ -20,9 +20,9 @@ import droneCop.Drone.DroneJson
 
 object ConsumerDroneStream extends App {
   val TOPIC = "DroneStream"
-  val mainConsumer = new ConsumerManager(TOPIC)
+  val consumerManager = new ConsumerManager(TOPIC)
 
-  mainConsumer.subscribe()
+  consumerManager.subscribe()
 
   val jsonUtils = new jsonUtils()
 
@@ -43,7 +43,7 @@ object ConsumerDroneStream extends App {
   }
 
   while (true) {
-    val records = mainConsumer.consumer.poll(100)
+    val records = consumerManager.poll(100)
     records.asScala.foreach { d =>
       val drone: DroneJson = jsonUtils.json2Drone(d.value())
       println("New message received from drone number " + drone.droneId)
@@ -63,6 +63,6 @@ object ConsumerDroneStream extends App {
       }
     }
   }
-  mainConsumer.consumer.close()
+  consumerManager.consumer.close()
 
 }
