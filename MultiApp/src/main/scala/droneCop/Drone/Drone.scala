@@ -10,7 +10,8 @@ case class DroneJson(
     alert: Int,
     location: Location,
     speed: Double,
-    battery: Double
+    battery: Double,
+    //violationCode: Int
 )
 
 case class Drone(val id: Int) {
@@ -30,6 +31,8 @@ case class Drone(val id: Int) {
 
   // battery in percentage
   var battery: Double = 100
+
+  // random alerts
   val r1 = scala.util.Random
   var alert: Int = if (r1.nextInt(100) == 0) 1 else 0
 
