@@ -30,8 +30,8 @@ case class Drone(val id: Int) {
 
   // battery in percentage
   var battery: Double = 100
-
-  var alert: Int = 0
+  val r1 = scala.util.Random
+  var alert: Int = if (r1.nextInt(100) == 0) 1 else 0
 
   // Coordinates
   case class Location(x: Double, y: Double)
