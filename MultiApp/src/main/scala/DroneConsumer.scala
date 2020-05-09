@@ -18,22 +18,15 @@ import droneCop.Managers.ProducerManager
 import droneCop.Utils.jsonUtils
 import droneCop.Drone.DroneJson
 
-object ConsumerDroneStream extends App {
+object DroneConsumer extends App {
+
   val TOPIC = "DroneStream"
+
   val consumerManager = new ConsumerManager(TOPIC)
 
   consumerManager.subscribe()
 
   val jsonUtils = new jsonUtils()
-
-  val sparkConf = new SparkConf()
-    .setAppName("Spark")
-    .setMaster("local[*]")
-
-  val sparkSession = SparkSession
-    .builder()
-    .config(sparkConf)
-    .getOrCreate()
 
   val alertProd = ProducerManager("AlertStream")
   val storageProd = ProducerManager("AllStream")
@@ -47,7 +40,10 @@ object ConsumerDroneStream extends App {
     records.asScala.foreach { d =>
       val drone: DroneJson = jsonUtils.json2Drone(d.value())
       println("New message received from drone number " + drone.droneId)
-      msgFromDrone(drone.droneId, "📍 - lat:" + drone.location.lat + ", long:" + drone.location.long)
+      msgFromDrone(
+        drone.droneId,
+        "📍 - lat:" + drone.location.lat + ", long:" + drone.location.long
+      )
       if (drone.alert == 1) {
         msgFromDrone(drone.droneId, "Alert!!!")
         msgFromDrone(drone.droneId, "Alert redirected to alert stream...")
@@ -57,12 +53,14 @@ object ConsumerDroneStream extends App {
         println("---")
       } else {
         msgFromDrone(drone.droneId, "Normal Message.")
-        msgFromDrone(drone.droneId, "Normal message redirected to storage stream...")
+        msgFromDrone(
+          drone.droneId,
+          "Normal message redirected to storage stream..."
+        )
         storageProd.send(d.value())
         println("---")
       }
     }
   }
   consumerManager.consumer.close()
-
 }
