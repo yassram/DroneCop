@@ -10,7 +10,7 @@ case class DroneJson(
     alert: Int,
     location: Location,
     speed: Double,
-    battery: Double,
+    battery: Double
     //violationCode: Int
 )
 

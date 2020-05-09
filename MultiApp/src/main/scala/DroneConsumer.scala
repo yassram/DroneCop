@@ -24,8 +24,6 @@ object DroneConsumer extends App {
 
   val consumerManager = new ConsumerManager(TOPIC)
 
-  consumerManager.subscribe()
-
   val jsonUtils = new jsonUtils()
 
   val alertProd = ProducerManager("AlertStream")
@@ -62,5 +60,6 @@ object DroneConsumer extends App {
       }
     }
   }
-  consumerManager.consumer.close()
+
+  consumerManager.close()
 }

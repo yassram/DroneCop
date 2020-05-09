@@ -43,7 +43,7 @@ object AlertConsumer extends App {
     val mailer = Mailer(session)
 
     val TOPIC = "AlertStream"
-    val mainConsumer = ConsumerManager(TOPIC)
+    val consumerManager = ConsumerManager(TOPIC)
 
     def jsonStrToMap(jsonStr: String): DroneJson = {
       implicit val formats = org.json4s.DefaultFormats
@@ -51,7 +51,7 @@ object AlertConsumer extends App {
     }
 
     while (true) {
-      val records = mainConsumer.consumer.poll(100)
+      val records = consumerManager.poll(100)
       records.asScala.foreach { d =>
         val drone = jsonStrToMap(d.value())
         println("Alert received from drone number " + drone.droneId)
@@ -74,6 +74,6 @@ object AlertConsumer extends App {
         mailer.close()
       }
     }
-    mainConsumer.consumer.close()
+    consumerManager.close()
   }
 }

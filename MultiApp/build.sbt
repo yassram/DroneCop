@@ -4,6 +4,11 @@ organization := "droneCop"
 version := "0.1"
 
 val sparkVersion = "2.4.2"
+val jacksonVersion = "2.6.5"
+
+dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion
+dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion
+dependencyOverrides += "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % jacksonVersion
 
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % sparkVersion,

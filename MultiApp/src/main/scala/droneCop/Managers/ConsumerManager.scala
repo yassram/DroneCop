@@ -30,17 +30,14 @@ case class ConsumerManager(topic: String) {
   kafkaProps.put("group.id", "drone")
 
   val consumer = new KafkaConsumer[String, String](kafkaProps)
+  consumer.subscribe(util.Collections.singletonList(topic))
 
-  def shutdown() = {
+  def close() = {
     if (consumer != null)
       consumer.close()
   }
 
-  def subscribe() {
-    consumer.subscribe(util.Collections.singletonList(topic))
-  }
-
-  def poll(timeout : Int) : ConsumerRecords[String, String] = {
+  def poll(timeout: Int): ConsumerRecords[String, String] = {
     consumer.poll(timeout)
   }
 }
