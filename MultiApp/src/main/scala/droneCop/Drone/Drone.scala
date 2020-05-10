@@ -4,14 +4,42 @@ import scala.math._
 case class Location(lat: Double, long: Double)
 case class DroneJson(
     droneId: Int,
-    timestamp: Long,
-    altitude: Double,
-    temperature: Double,
     alert: Int,
+    timestamp: Long,
+    //position
+    altitude: Double,
     location: Location,
+    //drone
     speed: Double,
-    battery: Double
-    //violationCode: Int
+    temperature: Double,
+    battery: Double,
+    //violation
+    violationCode: Int
+)
+
+case class DroneViolationJson(
+    droneId: Int,
+    alert: Int,
+    timestamp: Long,
+    //position
+    altitude: Double,
+    location: Location,
+    //drone
+    speed: Double,
+    temperature: Double,
+    battery: Double,
+    //violation
+    violationCode: Int,
+    //plate
+    plateState: String,
+    plateId: String,
+    plateType: String,
+    //vehicle
+    vehicleColor: String,
+    vehicleYear: String,
+    vehicleMake: String,
+    vehicleBody: String,
+    vehicleDate: String
 )
 
 case class Drone(val id: Int) {
@@ -32,16 +60,34 @@ case class Drone(val id: Int) {
   // battery in percentage
   var battery: Double = 100
 
-  // random alerts
+  // random
   val r1 = scala.util.Random
+
+  //alert
   var alert: Int = if (r1.nextInt(100) == 0) 1 else 0
+
+  //violation
+  var violationCode: Int = r1.nextInt(100)
 
   // Coordinates
   case class Location(x: Double, y: Double)
   var location = Location(0, 0)
 
   def toJsonString(): String = {
-    s"""{"drone_id" : ${droneId},"timestamp" : ${timestamp},"battery" : ${battery},"altitude" : ${altitude},"temperature" : ${temperature},"speed": ${speed}, "alert": ${alert}, "location" : {"lat" : ${location.x}, "long" : ${location.y}}}"""
+    s"""{
+    "drone_id" : ${droneId},
+    "timestamp" : ${timestamp},
+    "battery" : ${battery},
+    "altitude" : ${altitude},
+    "temperature" : ${temperature},
+    "speed" : ${speed},
+    "alert" : ${alert},
+    "violation_code" : ${alert},
+    "location" : { 
+      "lat" : ${location.x}, 
+      "long" : ${location.y}
+    }
+    }"""
 
   }
 

@@ -18,7 +18,7 @@ import javax.mail.internet.InternetAddress
 import com.github.jurajburian.mailer._
 
 import droneCop.Managers.ConsumerManager
-import droneCop.Utils.jsonUtils
+import droneCop.Utils.JsonUtils
 import droneCop.Drone.DroneJson
 
 object AlertConsumer extends App {
@@ -45,15 +45,12 @@ object AlertConsumer extends App {
     val TOPIC = "AlertStream"
     val consumerManager = ConsumerManager(TOPIC)
 
-    def jsonStrToMap(jsonStr: String): DroneJson = {
-      implicit val formats = org.json4s.DefaultFormats
-      parse(jsonStr).camelizeKeys.extract[DroneJson]
-    }
+    val jsonUtils = new JsonUtils()
 
     while (true) {
       val records = consumerManager.poll(100)
       records.asScala.foreach { d =>
-        val drone = jsonStrToMap(d.value())
+        val drone : DroneJson = jsonUtils.json2Drone(d.value())
         println("Alert received from drone number " + drone.droneId)
         val content: Content = new Content()
           .text("This is an alert!\n")

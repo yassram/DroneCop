@@ -15,7 +15,7 @@ import scala.concurrent.duration._
 
 import droneCop.Managers.ConsumerManager
 import droneCop.Managers.ProducerManager
-import droneCop.Utils.jsonUtils
+import droneCop.Utils.JsonUtils
 import droneCop.Drone.DroneJson
 
 object DroneConsumer extends App {
@@ -24,7 +24,7 @@ object DroneConsumer extends App {
 
   val consumerManager = new ConsumerManager(TOPIC)
 
-  val jsonUtils = new jsonUtils()
+  val jsonUtils = new JsonUtils()
 
   val alertProd = ProducerManager("AlertStream")
   val storageProd = ProducerManager("AllStream")
