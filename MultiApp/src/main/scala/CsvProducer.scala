@@ -3,6 +3,11 @@ package droneCop
 import org.apache.spark.sql.functions._
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.log4j.{Level, Logger}
+
+import droneCop.Managers.ConsumerManager
+import droneCop.Managers.ProducerManager
+import droneCop.Drone.{DroneJson, Location, DroneViolationJson}
 
 object CsvProducer extends App {
 
@@ -14,6 +19,9 @@ object CsvProducer extends App {
     .setMaster(
       "local[*]"
     )
+
+  val rootLogger = Logger.getRootLogger()
+  rootLogger.setLevel(Level.ERROR)
 
   val ss = SparkSession
     .builder()
@@ -27,5 +35,63 @@ object CsvProducer extends App {
     .option("header", "true")
     .load(pathToFile)
 
-println(df.groupBy("Plate ID").count().orderBy(desc("count")).show(10))
+  // RDD
+
+  // val csv = ss.sparkContext.textFile(pathToFile)
+  // val data = csv.map(line => line.split(",").map(elem => elem.trim))
+  // val header = new HeaderCsv(data.take(1)(0))
+  // val fakeDrone =
+  //   data.map(row => (header(row, "Plate ID"), header(row, "Violation Code").as[DroneJson]))
+  // fakeDrone.foreach { e =>
+  //   println(e)
+  //   Thread.sleep(500)
+  // }
+
+  // DF
+
+  //val producerManager = new ProducerManager("DroneStream")
+
+  val fakeDrone = df.select(
+    "Latitude",
+    "Longitude",
+    "Violation Code",
+    "Registration State",
+    "Plate ID",
+    "Plate Type",
+    "Vehicle Color",
+    "Vehicle Year",
+    "Vehicle Make",
+    "Vehicle Body Type",
+    "Vehicle Expiration Date"
+  )
+
+  fakeDrone.foreach { row =>
+    val position = Location(row(0).asInstanceOf[Int], row(1).asInstanceOf[Int])
+    val drone = DroneViolationJson(
+    0,
+    0,
+    0,
+    0.0,
+    position,
+    0.0,
+    0.0,
+    0.0,
+    row(2).asInstanceOf[Int],
+    row(3).toString(),
+    row(4).toString(),
+    row(5).toString(),
+    row(6).toString(),
+    row(7).toString(),
+    row(8).toString(),
+    row(9).toString(),
+    row(10).toString()
+    )
+    println(drone)
+    //producerManager.send(row)
+    Thread.sleep(500)
+  }
+
+  //producerManager(df)
+
+  //producerManager.close()
 }

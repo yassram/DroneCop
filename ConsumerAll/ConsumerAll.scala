@@ -73,9 +73,6 @@ object ConsumerAllStream extends App {
     parse(jsonStr).extract[Map[String, Any]]
   }
 
-  //val alertProd = ProducerManager("Alert")
-  //val storageProd = ProducerManager("All")
-
   while (true) {
     val records = mainConsumer.consumer.poll(500)
     records.asScala.foreach { drone =>
@@ -86,5 +83,4 @@ object ConsumerAllStream extends App {
     }
   }
   mainConsumer.consumer.close()
-
 }
