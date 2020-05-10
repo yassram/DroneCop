@@ -2,3 +2,4 @@
 */project
 */target
 .scalafmt.conf
+.DS_Store

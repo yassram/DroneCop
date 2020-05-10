@@ -1,6 +1,6 @@
 package droneCop.Managers
 
-import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.clients.consumer.{KafkaConsumer, ConsumerRecords}
 import scala.collection.JavaConverters._
 import java.util
 import java.util.Properties
@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import java.util.concurrent.{ExecutorService, Executors}
 
-class ConsumerManager(topic: String) {
+case class ConsumerManager(topic: String) {
 
   val kafkaProps = new Properties()
   kafkaProps.put("bootstrap.servers", "localhost:9092")
@@ -28,6 +28,7 @@ class ConsumerManager(topic: String) {
     "org.apache.kafka.common.serialization.StringDeserializer"
   )
   kafkaProps.put("group.id", "drone")
+
   val consumer = new KafkaConsumer[String, String](kafkaProps)
 
   def shutdown() = {
@@ -39,7 +40,7 @@ class ConsumerManager(topic: String) {
     consumer.subscribe(util.Collections.singletonList(topic))
   }
 
-  def run(callback: () => Unit) {
-    callback()
+  def poll(timeout : Int) : ConsumerRecords[String, String] = {
+    consumer.poll(timeout)
   }
 }

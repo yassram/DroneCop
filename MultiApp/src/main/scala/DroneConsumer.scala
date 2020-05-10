@@ -20,8 +20,9 @@ import droneCop.Drone.DroneJson
 
 object ConsumerDroneStream extends App {
   val TOPIC = "DroneStream"
-  val mainConsumer = new ConsumerManager(TOPIC)
-  mainConsumer.subscribe()
+  val consumerManager = new ConsumerManager(TOPIC)
+
+  consumerManager.subscribe()
 
   val jsonUtils = new jsonUtils()
 
@@ -42,12 +43,12 @@ object ConsumerDroneStream extends App {
   }
 
   while (true) {
-    val records = mainConsumer.consumer.poll(100)
+    val records = consumerManager.poll(100)
     records.asScala.foreach { d =>
       val drone: DroneJson = jsonUtils.json2Drone(d.value())
       println("New message received from drone number " + drone.droneId)
-      msgFromDrone(drone.droneId, "📍 - lat:" + drone.location.lat + ", long:" + drone.location.long + "🗺")
-      if (drone.battery == 1) {
+      msgFromDrone(drone.droneId, "📍 - lat:" + drone.location.lat + ", long:" + drone.location.long)
+      if (drone.alert == 1) {
         msgFromDrone(drone.droneId, "Alert!!!")
         msgFromDrone(drone.droneId, "Alert redirected to alert stream...")
         alertProd.send(d.value())
@@ -56,12 +57,12 @@ object ConsumerDroneStream extends App {
         println("---")
       } else {
         msgFromDrone(drone.droneId, "Normal Message.")
-        msgFromDrone(drone.droneId, "Alert redirected to storage stream...")
+        msgFromDrone(drone.droneId, "Normal message redirected to storage stream...")
         storageProd.send(d.value())
         println("---")
       }
     }
   }
-  mainConsumer.consumer.close()
+  consumerManager.consumer.close()
 
 }
