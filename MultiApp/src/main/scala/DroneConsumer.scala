@@ -27,7 +27,6 @@ object DroneConsumer extends App {
   val jsonUtils = new JsonUtils()
 
   val alertProd = ProducerManager("AlertStream")
-  // val storageProd = ProducerManager("AllStream")
 
   def msgFromDrone(droneId: Int, msg: String) {
     println("> " + droneId.toString() + ": " + msg)
@@ -42,22 +41,16 @@ object DroneConsumer extends App {
         drone.droneId,
         "📍 - lat:" + drone.location.lat + ", long:" + drone.location.long
       )
+      msgFromDrone(
+        drone.droneId,
+        "❗ - Violation Code :" + drone.violationCode
+      )
       if (drone.alert == 1) {
-        msgFromDrone(drone.droneId, "Alert!!!")
+        msgFromDrone(drone.droneId, "Alert!")
         msgFromDrone(drone.droneId, "Alert redirected to alert stream...")
         alertProd.send(d.value())
-        //msgFromDrone(drone.droneId, "Alert redirected to storage stream...")
-        //storageProd.send(d.value())
-        println("---")
-      } else {
-        msgFromDrone(drone.droneId, "Normal Message.")
-        // msgFromDrone(
-        //   drone.droneId,
-        //   "Normal message redirected to storage stream..."
-        // )
-        // storageProd.send(d.value())
-        println("---")
-      }
+      } 
+      println("---")
     }
   }
 
