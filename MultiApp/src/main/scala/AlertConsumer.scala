@@ -19,7 +19,7 @@ import com.github.jurajburian.mailer._
 
 import droneCop.Managers.ConsumerManager
 import droneCop.Utils.JsonUtils
-import droneCop.Drone.DroneJson
+import droneCop.Drone.DroneViolationJson
 
 object AlertConsumer extends App {
 
@@ -50,7 +50,7 @@ object AlertConsumer extends App {
     while (true) {
       val records = consumerManager.poll(100)
       records.asScala.foreach { d =>
-        val drone : DroneJson = jsonUtils.json2Drone(d.value())
+        val drone : DroneViolationJson = jsonUtils.json2Drone(d.value())
         println("Alert received from drone number " + drone.droneId)
         val content: Content = new Content()
           .text("This is an alert!\n")

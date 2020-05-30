@@ -16,7 +16,7 @@ import scala.concurrent.duration._
 import droneCop.Managers.ConsumerManager
 import droneCop.Managers.ProducerManager
 import droneCop.Utils.JsonUtils
-import droneCop.Drone.DroneJson
+import droneCop.Drone.DroneViolationJson
 
 object DroneConsumer extends App {
 
@@ -27,7 +27,7 @@ object DroneConsumer extends App {
   val jsonUtils = new JsonUtils()
 
   val alertProd = ProducerManager("AlertStream")
-  val storageProd = ProducerManager("AllStream")
+  // val storageProd = ProducerManager("AllStream")
 
   def msgFromDrone(droneId: Int, msg: String) {
     println("> " + droneId.toString() + ": " + msg)
@@ -36,7 +36,7 @@ object DroneConsumer extends App {
   while (true) {
     val records = consumerManager.poll(100)
     records.asScala.foreach { d =>
-      val drone: DroneJson = jsonUtils.json2Drone(d.value())
+      val drone: DroneViolationJson = jsonUtils.json2Drone(d.value())
       println("New message received from drone number " + drone.droneId)
       msgFromDrone(
         drone.droneId,
@@ -46,16 +46,16 @@ object DroneConsumer extends App {
         msgFromDrone(drone.droneId, "Alert!!!")
         msgFromDrone(drone.droneId, "Alert redirected to alert stream...")
         alertProd.send(d.value())
-        msgFromDrone(drone.droneId, "Alert redirected to storage stream...")
-        storageProd.send(d.value())
+        //msgFromDrone(drone.droneId, "Alert redirected to storage stream...")
+        //storageProd.send(d.value())
         println("---")
       } else {
         msgFromDrone(drone.droneId, "Normal Message.")
-        msgFromDrone(
-          drone.droneId,
-          "Normal message redirected to storage stream..."
-        )
-        storageProd.send(d.value())
+        // msgFromDrone(
+        //   drone.droneId,
+        //   "Normal message redirected to storage stream..."
+        // )
+        // storageProd.send(d.value())
         println("---")
       }
     }

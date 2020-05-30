@@ -73,6 +73,18 @@ case class Drone(val id: Int) {
   case class Location(x: Double, y: Double)
   var location = Location(0, 0)
 
+    //plate
+  var  plateState: String = "0"
+  var  plateId: String = "1"
+  var  plateType: String = "2"
+
+  //vehicle
+  var  vehicleColor: String = "3"
+  var  vehicleYear: String = "4"
+  var  vehicleMake: String = "5"
+  var  vehicleBody: String = "6"
+  var  vehicleDate: String = "7"
+
   def toJsonString(): String = {
     s"""{
     "drone_id" : ${droneId},
@@ -82,13 +94,20 @@ case class Drone(val id: Int) {
     "temperature" : ${temperature},
     "speed" : ${speed},
     "alert" : ${alert},
-    "violation_code" : ${alert},
+    "violation_code" : ${violationCode},
     "location" : { 
       "lat" : ${location.x}, 
       "long" : ${location.y}
-    }
+    },
+    "plateState" : "${plateState}",
+    "plateId" :  "${plateId}",
+    "plateType" :  "${plateType}",
+    "vehicleColor" :  "${vehicleColor}",
+    "vehicleYear" :  "${vehicleYear}",
+    "vehicleMake" :  "${vehicleMake}",
+    "vehicleBody" :  "${vehicleBody}",
+    "vehicleDate" :  "${vehicleDate}"
     }"""
-
   }
 
   // deltaTime in ms
