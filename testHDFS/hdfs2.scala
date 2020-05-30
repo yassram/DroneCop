@@ -4,7 +4,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.functions._
 import org.json4s.jackson.JsonMethods._
 import org.apache.spark.sql.types.StructType
-
+import org.apache.spark.sql.streaming.Trigger._
 
 object stream {
 case class Location(lat: Double, long: Double)
@@ -32,7 +32,7 @@ def json2Drone(jsonStr: String): DroneJson = {
 val conf = new SparkConf()
     .setAppName("streams")
     .setMaster(
-      "local[*]"
+      "local[1]"
     )
     
 
@@ -41,70 +41,32 @@ val spark = SparkSession
         //.config("spark.executor.heartbeatInterval", "10000ms")
         //.config("spark.master", "local")
         .config(conf)
-        .config("spark.sql.streaming.checkpointLocation", "/tmp/rayoutropbete")
+//        .config("spark.sql.streaming.checkpointLocation", "/tmp/rayoutropbete")
         .getOrCreate()
 import spark.implicits._
 
 def main(args: Array[String]): Unit = {
-
-    // spark
-    //     .readStream
-    //     .format("kafka")
-    //     .option("kafka.bootstrap.servers", "localhost:9092")
-    //     .option("subscribe", "DroneStream")
-    //     //.option("startingOffsets", "earliest")
-    //     .load()
-    //     .selectExpr("CAST(value AS STRING)")
-    //          .as[String]
-    //     // .writeStream
-    //     // .format("console")
-    //     // .start()
-    //     .writeStream
-    //     .outputMode("append")
-    //     .format("text")        // can be "orc", "json", "csv", etc.
-    //     //.option("checkpointLocation", "./rayoutropbete")
-    //     .option("path", "./rayoutropbete")
-    //     .start()
-        
-    // spark.streams.awaitAnyTermination()
- 
-
-    // val kafkaStreamDF = spark.readStream.format("kafka")
-    //             .option("sep", ",")
-    //             .option("kafka.bootstrap.servers", "localhost:9092")
-    //             .option("subscribe", "DroneStream")
-    //             .option("startingOffsets", "earliest")
-    //             .load()
-    //             .selectExpr("CAST(value AS STRING)")
-    //               .as[String]
-
-    // val schemastruct = new StructType().add("lat","double").add("long", "double")
-    // val schemaforfile = new StructType().add("droneId","integer")
-    //         .add("alert","integer").add("timestamp","integer").add("altitude","double")
-    //         .add("location", schemastruct).add("speed", "double").add("temperature", "double")
-    //         .add("battery", "double").add("violationCode", "integer")
+    val schemastruct = new StructType().add("lat","double").add("long", "double")
+    val schemaforfile = new StructType().add("droneId","integer")
+            .add("alert","integer").add("timestamp","integer").add("altitude","double")
+            .add("location", schemastruct).add("speed", "double").add("temperature", "double")
+            .add("battery", "double").add("violationCode", "integer")
 
     val sdfToHdfs = spark.readStream.format("kafka")
                 .option("kafka.bootstrap.servers", "localhost:9092")
                 .option("subscribe", "DroneStream")
-                .option("startingOffsets", "latest")
                 .load()
-                .selectExpr("CAST(value AS STRING)")
+                //.select(from_json(col("value").cast("string"), schemaforfile))
+                //.alias("csv").select("csv.*")
 
     sdfToHdfs.writeStream.outputMode("append")
-        .format("parquet")
-        .option("")
-        .option("parquet.block.size", 10240)
-        .option("path", "hdfs://localhost:9000/Drones/Messages")
-        .option("checkpointLocation", "hdfs://localhost:9000/tmp/Messages_checkpoints")
-        .partitionBy("window")
+        .format("text")
+        .option("path", "./test")//"hdfs://localhost:9000/Drones/Messages")
+        .option("checkpointLocation", "/tmp/test")//"hdfs://localhost:9000/tmp/Messages_checkpoints")
+        //.partitionBy("window")
         //.option("truncate", False) 
         .trigger(ProcessingTime("120 seconds"))
-        
-
-    sdfToHdfs.start()
-    sdfToHdfs.awaitTermination()
-
+        .start().awaitTermination()
 
     }
 }
