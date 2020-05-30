@@ -35,16 +35,17 @@ object DroneSimulator {
     println("-------------------------------------------")
 
     // generete *numberOfDrones* drones
-    val drones = (0 to numberOfDrones - 1).toList.map { new Drone(_) }
+    val drones = (0 to numberOfDrones - 1)
     val producerManager = ProducerManager("DroneStream")
 
     val timer = new java.util.Timer()
     val task = new java.util.TimerTask {
       def run() = {
+
         // log foreach drone
-        drones.map { _.toJsonString() }.foreach { producerManager.send(_) }
-        // update drones
-        drones.foreach { _.update(droneRefreshRate) }
+        drones.map { DroneMessage(_).toJsonString() }.foreach { producerManager.send(_) }
+        drones.map { DroneMessage(_).toJsonString() }.foreach { println(_) }
+
       }
     }
     timer.schedule(task, 0, droneRefreshRate)

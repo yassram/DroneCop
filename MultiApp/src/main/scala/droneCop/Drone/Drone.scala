@@ -42,48 +42,64 @@ case class DroneViolationJson(
     vehicleDate: String
 )
 
-case class Drone(val id: Int) {
-  var droneId: Int = id
+case class DroneMessage(val id: Int) {
+
+  val r = scala.util.Random
+
+  val droneId: Int = id
 
   // time
-  var timestamp: Long = 0
+  val timestamp: Long = 0
 
   // altitude in meters
-  var altitude: Double = 0
+  val altitude: Double = 2 + r.nextDouble() * 4
 
   // temperature in degrees Celsius
-  var temperature: Double = 25
+  val temperature: Double = 25 +pow(-1, r.nextInt(2)) * r.nextDouble() * 6
 
   // Speed in m/s
-  var speed: Double = 0
+  val speed: Double = 2 + r.nextDouble() * 11
 
   // battery in percentage
-  var battery: Double = 100
-
-  // random
-  val r1 = scala.util.Random
+  val battery: Double = 0 + r.nextDouble() * 6
 
   //alert
-  var alert: Int = if (r1.nextInt(100) == 0) 1 else 0
+  val alert: Int = if (r.nextInt(60000) == 0) 1 else 0
 
   //violation
-  var violationCode: Int = r1.nextInt(100)
+  val violationCode: Int = if (alert == 1) 100 else (if (r.nextInt(600) == 0) r.nextInt(100) else -1)
 
   // Coordinates
+  val x = 100 + pow(-1, r.nextInt(2)) * r.nextDouble() * 10
+  val y = 100 + pow(-1, r.nextInt(2)) * r.nextDouble() * 10
   case class Location(x: Double, y: Double)
-  var location = Location(0, 0)
+  val location = Location(x, y)
+
+  def plateGen(): String = {
+
+    val c0 = ('A'.toInt + r.nextInt('Z'.toInt - 'A'.toInt)).toChar
+    val c1 = ('A'.toInt + r.nextInt('Z'.toInt - 'A'.toInt)).toChar
+
+    return s"${c0}${c1}${100000 + r.nextInt(899999)}"
+  }
+
 
     //plate
-  var  plateState: String = "0"
-  var  plateId: String = "1"
-  var  plateType: String = "2"
+  val  plateState: String =  ("NY", "NJ", "PA", "CT", "FL", "MA", "IN", "VA", "MD", 
+    "NC", "99", "IL", "GA", "TX", "AZ", "ME", "OH", "CA", "OK", "SC", "TN", "MI", 
+    "DE", "MN", "RI", "NH", "AL", "WA", "VT", "OR", "ON", "QB", "WI", "ID", "KY", 
+    "IA", "DC", "MS", "DP", "CO", "MO", "NM", "AR", "LA", "WV", "NV", "SD", "NE", 
+    "UT", "KS", "NS", "GV", "AK", "MT", "ND", "HI", "WY", "AB", "PR", "BC", "NB", 
+    "PE", "MB", "SK", "FO", "MX", "YT", "NT")(r.nextInt(68))
+  val  plateId: String = plateGen()
+  val  plateType: String = List("0", "1", "2", "3", "4")(r.nextInt(5))
 
   //vehicle
-  var  vehicleColor: String = "3"
-  var  vehicleYear: String = "4"
-  var  vehicleMake: String = "5"
-  var  vehicleBody: String = "6"
-  var  vehicleDate: String = "7"
+  val  vehicleColor: String = s"${r.nextInt(30)}"
+  val  vehicleYear: String = s"${1960 + r.nextInt(60)}"
+  val  vehicleMake: String = s"${r.nextInt(30)}"
+  val  vehicleBody: String = s"${r.nextInt(30)}"
+  val  vehicleDate: String = s"${r.nextInt(1220)}"
 
   def toJsonString(): String = {
     s"""{
@@ -108,44 +124,6 @@ case class Drone(val id: Int) {
     "vehicleBody" :  "${vehicleBody}",
     "vehicleDate" :  "${vehicleDate}"
     }"""
-  }
-
-  // deltaTime in ms
-  def update(deltaTime: Long) {
-    val r = scala.util.Random
-
-    // update battery
-    battery = battery - (deltaTime * 100) / (30 * 60 * 1000)
-
-    //alert random
-    alert = if (r.nextInt(100) == 0) 1 else 0
-
-    var newAltitude = altitude + pow(-1, r.nextInt(2)) * r.nextDouble() * 5
-    if (newAltitude > 10) { newAltitude = 6 }
-    if (newAltitude < 3) { newAltitude = 5 }
-
-    var newX = location.x + pow(-1, r.nextInt(2)) * r.nextDouble() * 10
-    var newY = location.y + pow(-1, r.nextInt(2)) * r.nextDouble() * 10
-
-    // compute speed
-    speed = sqrt(
-      pow(newX - location.x, 2) + pow(newY - location.y, 2) + pow(
-        newAltitude - altitude,
-        2
-      )
-    ) / deltaTime * 1000
-
-    // update altitude
-    altitude = newAltitude
-
-    // update location
-    location = Location(newX, newY)
-
-    // update temperature
-    temperature = temperature + +pow(-1, r.nextInt(2)) * r.nextDouble() * 0.1
-
-    // update timestamp
-    timestamp = timestamp + deltaTime
   }
 
 }
