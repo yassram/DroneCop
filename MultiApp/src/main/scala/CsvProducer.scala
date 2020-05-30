@@ -5,6 +5,8 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.log4j.{Level, Logger}
 
+import droneCop.Utils.JsonUtils
+
 import droneCop.Managers.ConsumerManager
 import droneCop.Managers.ProducerManager
 import droneCop.Drone.{DroneJson, Location, DroneViolationJson}
@@ -23,6 +25,8 @@ object CsvProducer extends App {
   val rootLogger = Logger.getRootLogger()
   rootLogger.setLevel(Level.ERROR)
 
+  val jsonUtils = new JsonUtils()
+
   val ss = SparkSession
     .builder()
     .config(conf)
@@ -35,21 +39,7 @@ object CsvProducer extends App {
     .option("header", "true")
     .load(pathToFile)
 
-  // RDD
-
-  // val csv = ss.sparkContext.textFile(pathToFile)
-  // val data = csv.map(line => line.split(",").map(elem => elem.trim))
-  // val header = new HeaderCsv(data.take(1)(0))
-  // val fakeDrone =
-  //   data.map(row => (header(row, "Plate ID"), header(row, "Violation Code").as[DroneJson]))
-  // fakeDrone.foreach { e =>
-  //   println(e)
-  //   Thread.sleep(500)
-  // }
-
-  // DF
-
-  //val producerManager = new ProducerManager("DroneStream")
+  val producerManager = new ProducerManager("DroneStream")
 
   val fakeDrone = df.select(
     "Latitude",
@@ -62,20 +52,26 @@ object CsvProducer extends App {
     "Vehicle Year",
     "Vehicle Make",
     "Vehicle Body Type",
-    "Vehicle Expiration Date"
+    "Vehicle Expiration Date",
+    "Summons Number",
+    "Issue Date"
   )
 
   fakeDrone.foreach { row =>
     val position = Location(row(0).asInstanceOf[Int], row(1).asInstanceOf[Int])
+    val alt = 1.0
+    val speed = 1.0
+    val temperature = 1.0
+    val battery = 1.0
     val drone = DroneViolationJson(
+    0,//row(11).asInstanceOf[Int],
     0,
-    0,
-    0,
-    0.0,
+    0, //row(12).asInstanceOf[Long],
+    alt, //random environ 4-5
     position,
-    0.0,
-    0.0,
-    0.0,
+    speed, //random speed
+    temperature, //random temperature
+    battery, //random entre 0 et 100
     row(2).asInstanceOf[Int],
     row(3).toString(),
     row(4).toString(),
@@ -87,11 +83,10 @@ object CsvProducer extends App {
     row(10).toString()
     )
     println(drone)
-    //producerManager.send(row)
+    producerManager.send(jsonUtils.drone2Json(drone))
     Thread.sleep(500)
   }
 
-  //producerManager(df)
 
-  //producerManager.close()
+  producerManager.close()
 }
