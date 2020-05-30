@@ -96,9 +96,10 @@ def main(args: Array[String]): Unit = {
         .option("")
         .option("parquet.block.size", 10240)
         .option("path", "hdfs://localhost:9000/Drones/Messages")
-        .option("checkpointLocation", "hdfs://localhost:9000/tmp/checkpoints/")
+        .option("checkpointLocation", "hdfs://localhost:9000/tmp/Messages_checkpoints")
         .partitionBy("window")
-        //.option("truncate", False)
+        //.option("truncate", False) 
+        .trigger(ProcessingTime("120 seconds"))
         
 
     sdfToHdfs.start()

@@ -8,7 +8,7 @@ object Reader extends App {
 
 
 
-    val pathToFile = "/Users/yassram/Documents/school/ing2/scala-spark/pr/DroneCop/Reader/file.csv"
+    val pathToFile = "hdfs://localhost:9000/Drones/Messages"
 
 	val conf = new SparkConf()
                         .setAppName("Wordcount")
