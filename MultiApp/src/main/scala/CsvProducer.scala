@@ -14,7 +14,7 @@ import droneCop.Drone.{DroneJson, Location, DroneViolationJson}
 object CsvProducer extends App {
 
   val pathToFile =
-    "/mnt/c/Users/XPS15/OneDrive - EPITA/Documents/Cours/Epita - Scia/Cours/Scala/Projet/Data/Parking_Violations_Issued_-_Fiscal_Year_2016.csv"
+    "/Users/yassram/Desktop/Parking_Violations_Issued_-_Fiscal_Year_2016.csv"
 
   val conf = new SparkConf()
     .setAppName("CsvProducer")
@@ -42,45 +42,37 @@ object CsvProducer extends App {
   val producerManager = new ProducerManager("DroneStream")
 
   val fakeDrone = df.select(
-    "Latitude",
-    "Longitude",
-    "Violation Code",
-    "Registration State",
-    "Plate ID",
-    "Plate Type",
-    "Vehicle Color",
-    "Vehicle Year",
-    "Vehicle Make",
-    "Vehicle Body Type",
-    "Vehicle Expiration Date",
-    "Summons Number",
-    "Issue Date"
-  )
+    // "Latitude",                   //  0
+    // "Longitude",                  //  1
+    "Violation Code",             //  2
+    "Registration State",         //  3
+    "Plate ID",                   //  4
+    "Plate Type",                 //  5
+    "Vehicle Color",              //  6
+    "Vehicle Make",               //  7
+    "Vehicle Body Type",          //  8
+    "Vehicle Year"                //  9
+  )   
 
   fakeDrone.foreach { row =>
-    val position = Location(row(0).asInstanceOf[Int], row(1).asInstanceOf[Int])
-    val alt = 1.0
-    val speed = 1.0
-    val temperature = 1.0
-    val battery = 1.0
+    val position = Location(0, 0)
     val drone = DroneViolationJson(
-    0,//row(11).asInstanceOf[Int],
-    0,
-    0, //row(12).asInstanceOf[Long],
-    alt, //random environ 4-5
-    position,
-    speed, //random speed
-    temperature, //random temperature
-    battery, //random entre 0 et 100
-    row(2).asInstanceOf[Int],
-    row(3).toString(),
-    row(4).toString(),
-    row(5).toString(),
-    row(6).toString(),
-    row(7).toString(),
-    row(8).toString(),
-    row(9).toString(),
-    row(10).toString()
+    -1,                           // drone_id
+    -1,                           // alert
+    "-1",                         // timestamp
+    -1,                           // altitude
+    position,                     // location
+    -1,                           // speed
+    -1,                           // temperature
+    -1,                           // battery
+    Option(row(0)).map(_.toString).getOrElse("-1").toInt,     // violation code
+    Option(row(1)).map(_.toString).getOrElse(""),            // plate state
+    Option(row(2)).map(_.toString).getOrElse(""),            // plate id
+    Option(row(3)).map(_.toString).getOrElse(""),            // plate type
+    Option(row(7)).map(_.toString).getOrElse(""),            // plate year
+    Option(row(4)).map(_.toString).getOrElse(""),            // vehicule color
+    Option(row(5)).map(_.toString).getOrElse(""),            // vehicule make
+    Option(row(6)).map(_.toString).getOrElse("")             // vehicule body
     )
     println(drone)
     producerManager.send(jsonUtils.drone2Json(drone))

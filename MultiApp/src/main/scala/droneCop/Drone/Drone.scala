@@ -22,7 +22,7 @@ case class DroneJson(
 case class DroneViolationJson(
     droneId: Int,
     alert: Int,
-    timestamp: Long,
+    timestamp: String,
     //position
     altitude: Double,
     location: Location,
@@ -41,7 +41,6 @@ case class DroneViolationJson(
     vehicleYear: String,
     vehicleMake: String,
     vehicleBody: String,
-    vehicleDate: String
 )
 
 case class DroneMessage(val id: Int) {
@@ -69,7 +68,7 @@ case class DroneMessage(val id: Int) {
   val speed: Double = 2 + r.nextDouble() * 11
 
   // battery in percentage
-  val battery: Double = 0 + r.nextDouble() * 6
+  val battery: Double = 100 - r.nextDouble() * 100
 
   //alert
   val alert: Int = if (r.nextInt(60000) == 0) 1 else 0
