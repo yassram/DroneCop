@@ -85,7 +85,7 @@ case class DroneMessage(val id: Int) {
 
 
     //plate
-  val  plateState: String =  ("NY", "NJ", "PA", "CT", "FL", "MA", "IN", "VA", "MD", 
+  val  plateState: String =  List("NY", "NJ", "PA", "CT", "FL", "MA", "IN", "VA", "MD", 
     "NC", "99", "IL", "GA", "TX", "AZ", "ME", "OH", "CA", "OK", "SC", "TN", "MI", 
     "DE", "MN", "RI", "NH", "AL", "WA", "VT", "OR", "ON", "QB", "WI", "ID", "KY", 
     "IA", "DC", "MS", "DP", "CO", "MO", "NM", "AR", "LA", "WV", "NV", "SD", "NE", 
@@ -110,11 +110,13 @@ case class DroneMessage(val id: Int) {
     "temperature" : ${temperature},
     "speed" : ${speed},
     "alert" : ${alert},
-    "violation_code" : ${violationCode},
     "location" : { 
       "lat" : ${location.x}, 
       "long" : ${location.y}
-    },
+    }${
+      if (violationCode != -1) {
+    s""",
+    "violation_code" : ${violationCode},
     "plateState" : "${plateState}",
     "plateId" :  "${plateId}",
     "plateType" :  "${plateType}",
@@ -123,6 +125,11 @@ case class DroneMessage(val id: Int) {
     "vehicleMake" :  "${vehicleMake}",
     "vehicleBody" :  "${vehicleBody}",
     "vehicleDate" :  "${vehicleDate}"
+    """
+      } else {
+        ""
+      }
+    }
     }"""
   }
 
