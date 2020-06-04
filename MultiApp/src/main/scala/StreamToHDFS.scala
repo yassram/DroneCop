@@ -1,4 +1,5 @@
 //import org.apache.spark.sql.functions._
+package droneCop
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.functions._
@@ -9,7 +10,7 @@ import org.apache.spark.sql.streaming.Trigger._
 object stream {
 
 val conf = new SparkConf()
-    .setAppName("streams")
+    .setAppName("StreamToHDFS")
     .setMaster(
       "local[1]"
     )

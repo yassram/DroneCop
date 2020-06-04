@@ -1,4 +1,4 @@
-name := "Reader"
+name := "Analyses"
 
 
 version := "0.1"
