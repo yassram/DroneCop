@@ -142,21 +142,28 @@ case class DroneMessage(val id: Int) {
     "speed" : ${speed},
     "alert" : ${alert},
     "lat" : ${lat}, 
-    "long" : ${long}
+    "long" : ${long},
     ${
       if (violationCode != -1) {
-    s""",
-    "violation_code" : ${violationCode},
+    s""""violation_code" : ${violationCode},
     "plateState" : "${plateState}",
     "plateId" :  "${plateId}",
     "plateType" :  "${plateType}",
     "vehicleColor" :  "${vehicleColor}",
     "vehicleYear" :  "${vehicleYear}",
     "vehicleMake" :  "${vehicleMake}",
-    "vehicleBody" :  "${vehicleBody}",
+    "vehicleBody" :  "${vehicleBody}"
     """
       } else {
-        ""
+        s""""violation_code" : -1,
+    "plateState" : "",
+    "plateId" :  "",
+    "plateType" :  "",
+    "vehicleColor" :  "",
+    "vehicleYear" :  "",
+    "vehicleMake" :  "",
+    "vehicleBody" :  ""
+    """
       }
     }
     }"""

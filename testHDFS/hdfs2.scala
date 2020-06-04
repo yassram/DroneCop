@@ -7,28 +7,6 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.streaming.Trigger._
 
 object stream {
-case class Location(lat: Double, long: Double)
-case class DroneJson(
-    droneId: Int,
-    alert: Int,
-    timestamp: Long,
-    //position
-    altitude: Double,
-    lat: Double,
-    long: Double,
-    //drone
-    speed: Double,
-    temperature: Double,
-    battery: Double,
-    //violation
-    violationCode: Int
-)
-
-def json2Drone(jsonStr: String): DroneJson = {
-    implicit val formats = org.json4s.DefaultFormats
-    parse(jsonStr).camelizeKeys.extract[DroneJson]
-  }
-
 
 val conf = new SparkConf()
     .setAppName("streams")
@@ -36,7 +14,6 @@ val conf = new SparkConf()
       "local[1]"
     )
     
-
 val spark = SparkSession
         .builder()
         .config(conf)
@@ -44,27 +21,27 @@ val spark = SparkSession
 
 import spark.implicits._
 
-
-val stringify = udf((vs: Seq[String]) => vs match {
-  case null => null
-  case _    => s"""[${vs.mkString(",")}]"""
-})
-
-// df.withColumn("json", stringify($"json")).write.csv(...)
-
 def main(args: Array[String]): Unit = {
 
     val schemaforfile = new StructType()
-            .add("drone_id","integer")
-            .add("timestamp","string")
+            .add("drone_id", "integer")
+            .add("timestamp", "string")
             .add("battery", "double")
-            .add("altitude","double")
+            .add("altitude", "double")
             .add("temperature", "double")
             .add("speed", "double")
-            .add("alert","integer")
-            .add("lat","double")
+            .add("alert", "integer")
+            .add("lat", "double")
             .add("long", "double")
-            //.add("violationCode", "integer")
+            .add("violationCode", "integer")
+            .add("violation_code", "string")
+            .add("plateState", "string")
+            .add("plateId", "string")
+            .add("plateType", "string")
+            .add("vehicleColor", "string")
+            .add("vehicleYear", "string")
+            .add("vehicleMake", "string")
+            .add("vehicleBody", "string")
 
     val sdfToHdfs = spark.readStream.format("kafka")
                 .option("kafka.bootstrap.servers", "localhost:9092")
@@ -78,10 +55,12 @@ def main(args: Array[String]): Unit = {
         .option("header", true)
         .option("path", "hdfs://localhost:9000/Drones/Messages")
         .option("checkpointLocation", "hdfs://localhost:9000/tmp/Messages_checkpoints")
-        .partitionBy("window")
-        .option("truncate", False) 
+        .option("parquet.block.size", 10240)
+        // .partitionBy("window")
+        // .option("truncate", False) 
         .trigger(ProcessingTime("11 seconds"))
-        .start().awaitTermination()
+        .start()
+        .awaitTermination()
 
     }
 }
