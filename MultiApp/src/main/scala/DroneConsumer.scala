@@ -39,7 +39,7 @@ object DroneConsumer extends App {
       println("New message received from drone number " + drone.droneId)
       msgFromDrone(
         drone.droneId,
-        "📍 - lat:" + drone.location.lat + ", long:" + drone.location.long
+        "📍 - lat:" + drone.lat + ", long:" + drone.long
       )
       msgFromDrone(
         drone.droneId,

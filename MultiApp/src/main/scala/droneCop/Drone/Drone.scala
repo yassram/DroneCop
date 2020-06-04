@@ -3,14 +3,14 @@ import scala.math._
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-case class Location(lat: Double, long: Double)
 case class DroneJson(
     droneId: Int,
     alert: Int,
     timestamp: Long,
     //position
     altitude: Double,
-    location: Location,
+    lat: Double,
+    long: Double,
     //drone
     speed: Double,
     temperature: Double,
@@ -25,7 +25,8 @@ case class DroneViolationJson(
     timestamp: String,
     //position
     altitude: Double,
-    location: Location,
+    lat: Double,
+    long: Double,
     //drone
     speed: Double,
     temperature: Double,
@@ -79,8 +80,8 @@ case class DroneMessage(val id: Int) {
   // Coordinates
   val x = 100 + pow(-1, r.nextInt(2)) * r.nextDouble() * 10
   val y = 100 + pow(-1, r.nextInt(2)) * r.nextDouble() * 10
-  case class Location(x: Double, y: Double)
-  val location = Location(x, y)
+  val lat = x
+  val long = y
 
   def plateGen(): String = {
 
@@ -134,16 +135,15 @@ case class DroneMessage(val id: Int) {
   def toJsonString(): String = {
     s"""{
     "drone_id" : ${droneId},
-    "timestamp" : ${timestamp},
+    "timestamp" : "${timestamp}",
     "battery" : ${battery},
     "altitude" : ${altitude},
     "temperature" : ${temperature},
     "speed" : ${speed},
     "alert" : ${alert},
-    "location" : { 
-      "lat" : ${location.x}, 
-      "long" : ${location.y}
-    }${
+    "lat" : ${lat}, 
+    "long" : ${long}
+    ${
       if (violationCode != -1) {
     s""",
     "violation_code" : ${violationCode},

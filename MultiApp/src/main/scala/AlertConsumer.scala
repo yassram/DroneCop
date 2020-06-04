@@ -55,7 +55,7 @@ object AlertConsumer extends App {
         val content: Content = new Content()
           .text("This is an alert!\n")
           .html(
-            s"<html><body>" + "<img width='600' src='https://maps.googleapis.com/maps/api/staticmap?center=" + drone.location.lat + "," + drone.location.long + "&zoom=16&scale=1&size=600x300&maptype=roadmap&key=AIzaSyDSIp9pblkkr5nxfRhujeBvVe27JzwHlTM&format=png&visual_refresh=true&markers=size:mid%7Ccolor:0xff0000%7Clabel:%7C" + drone.location.lat + "," + drone.location.long + "'>" + "</body></html>"
+            s"<html><body>" + "<img width='600' src='https://maps.googleapis.com/maps/api/staticmap?center=" + drone.lat + "," + drone.long + "&zoom=16&scale=1&size=600x300&maptype=roadmap&key=AIzaSyDSIp9pblkkr5nxfRhujeBvVe27JzwHlTM&format=png&visual_refresh=true&markers=size:mid%7Ccolor:0xff0000%7Clabel:%7C" + drone.lat + "," + drone.long + "'>" + "</body></html>"
           )
         val msg = Message(
           from = new InternetAddress(args(0)),

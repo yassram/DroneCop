@@ -3,7 +3,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.functions._
 import org.json4s.jackson.JsonMethods._
-import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.types._
 import org.apache.spark.sql.streaming.Trigger._
 
 object stream {
@@ -14,7 +14,8 @@ case class DroneJson(
     timestamp: Long,
     //position
     altitude: Double,
-    location: Location,
+    lat: Double,
+    long: Double,
     //drone
     speed: Double,
     temperature: Double,
@@ -38,34 +39,48 @@ val conf = new SparkConf()
 
 val spark = SparkSession
         .builder()
-        //.config("spark.executor.heartbeatInterval", "10000ms")
-        //.config("spark.master", "local")
         .config(conf)
-//        .config("spark.sql.streaming.checkpointLocation", "/tmp/rayoutropbete")
         .getOrCreate()
+
 import spark.implicits._
 
+
+val stringify = udf((vs: Seq[String]) => vs match {
+  case null => null
+  case _    => s"""[${vs.mkString(",")}]"""
+})
+
+// df.withColumn("json", stringify($"json")).write.csv(...)
+
 def main(args: Array[String]): Unit = {
-    val schemastruct = new StructType().add("lat","double").add("long", "double")
-    val schemaforfile = new StructType().add("droneId","integer")
-            .add("alert","integer").add("timestamp","integer").add("altitude","double")
-            .add("location", schemastruct).add("speed", "double").add("temperature", "double")
-            .add("battery", "double").add("violationCode", "integer")
+
+    val schemaforfile = new StructType()
+            .add("drone_id","integer")
+            .add("timestamp","string")
+            .add("battery", "double")
+            .add("altitude","double")
+            .add("temperature", "double")
+            .add("speed", "double")
+            .add("alert","integer")
+            .add("lat","double")
+            .add("long", "double")
+            //.add("violationCode", "integer")
 
     val sdfToHdfs = spark.readStream.format("kafka")
                 .option("kafka.bootstrap.servers", "localhost:9092")
                 .option("subscribe", "DroneStream")
                 .load()
-                //.select(from_json(col("value").cast("string"), schemaforfile))
-                //.alias("csv").select("csv.*")
+                .select(from_json(col("value").cast("string"), schemaforfile).alias("tmp"))
+                .select("tmp.*")
 
     sdfToHdfs.writeStream.outputMode("append")
-        .format("text")
-        .option("path", "./test")//"hdfs://localhost:9000/Drones/Messages")
-        .option("checkpointLocation", "/tmp/test")//"hdfs://localhost:9000/tmp/Messages_checkpoints")
-        //.partitionBy("window")
-        //.option("truncate", False) 
-        .trigger(ProcessingTime("120 seconds"))
+        .format("parquet")
+        .option("header", true)
+        .option("path", "hdfs://localhost:9000/Drones/Messages")
+        .option("checkpointLocation", "hdfs://localhost:9000/tmp/Messages_checkpoints")
+        .partitionBy("window")
+        .option("truncate", False) 
+        .trigger(ProcessingTime("11 seconds"))
         .start().awaitTermination()
 
     }

@@ -9,7 +9,7 @@ import droneCop.Utils.JsonUtils
 
 import droneCop.Managers.ConsumerManager
 import droneCop.Managers.ProducerManager
-import droneCop.Drone.{DroneJson, Location, DroneViolationJson}
+import droneCop.Drone.{DroneJson, DroneViolationJson}
 
 object CsvProducer extends App {
 
@@ -55,13 +55,12 @@ object CsvProducer extends App {
   )   
 
   fakeDrone.foreach { row =>
-    val position = Location(0, 0)
     val drone = DroneViolationJson(
     -1,                           // drone_id
     -1,                           // alert
     "-1",                         // timestamp
     -1,                           // altitude
-    position,                     // location
+    0,0,                          // lat, long
     -1,                           // speed
     -1,                           // temperature
     -1,                           // battery
