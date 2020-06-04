@@ -11,7 +11,7 @@ object Reader extends App {
     val pathToFile = "hdfs://localhost:9000/Drones/Messages"
 
 	val conf = new SparkConf()
-                        .setAppName("Wordcount")
+                        .setAppName("Stats")
                         .setMaster("local[*]") // here local mode. And * means you will use as much as you have cores.
     
     val rootLogger = Logger.getRootLogger()
@@ -21,11 +21,5 @@ object Reader extends App {
         .config(conf)
         .getOrCreate()
 
-    val df = ss.read.format("csv")
-                    .option("sep", ",")
-                    .option("inferSchema", "true")
-                    .option("header", "true")
-                    .load(pathToFile)
-
-    //println(df.groupBy("Plate ID").count().orderBy(desc("count")).show(2))
+    val df = ss.read.format("parquet").load(pathToFile + "/*.parquet")
 }
