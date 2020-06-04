@@ -42,7 +42,48 @@ case class DroneViolationJson(
     vehicleYear: String,
     vehicleMake: String,
     vehicleBody: String,
-)
+) {
+
+def toJsonString(): String = {
+    s"""{
+    "drone_id" : ${droneId},
+    "timestamp" : "${timestamp}",
+    "battery" : ${battery},
+    "altitude" : ${altitude},
+    "temperature" : ${temperature},
+    "speed" : ${speed},
+    "alert" : ${alert},
+    "lat" : ${lat}, 
+    "long" : ${long},
+    ${
+      if (violationCode != -1) {
+    s""""violation_code" : ${violationCode},
+    "plateState" : "${plateState}",
+    "plateId" :  "${plateId}",
+    "plateType" :  "${plateType}",
+    "vehicleColor" :  "${vehicleColor}",
+    "vehicleYear" :  "${vehicleYear}",
+    "vehicleMake" :  "${vehicleMake}",
+    "vehicleBody" :  "${vehicleBody}"
+    """
+      } else {
+        s""""violation_code" : -1,
+    "plateState" : "",
+    "plateId" :  "",
+    "plateType" :  "",
+    "vehicleColor" :  "",
+    "vehicleYear" :  "",
+    "vehicleMake" :  "",
+    "vehicleBody" :  ""
+    """
+      }
+    }
+    }"""
+  }
+
+
+  
+}
 
 case class DroneMessage(val id: Int) {
 

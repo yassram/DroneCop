@@ -26,8 +26,6 @@ object DroneConsumer extends App {
 
   val jsonUtils = new JsonUtils()
 
-  val alertProd = ProducerManager("AlertStream")
-
   def msgFromDrone(droneId: Int, msg: String) {
     println("> " + droneId.toString() + ": " + msg)
   }
@@ -48,7 +46,7 @@ object DroneConsumer extends App {
       if (drone.alert == 1) {
         msgFromDrone(drone.droneId, "Alert!")
         msgFromDrone(drone.droneId, "Alert redirected to alert stream...")
-        alertProd.send(d.value())
+        ProducerManager.send("AlertStream", d.value())
       } 
       println("---")
     }

@@ -14,7 +14,7 @@ import java.util.Properties
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-case class ProducerManager(topic: String) {
+object ProducerManager {
     val props = new Properties()
     props.put("bootstrap.servers", "localhost:9092")
 
@@ -33,7 +33,7 @@ case class ProducerManager(topic: String) {
 
     val producer = new KafkaProducer[String, String](props)
 
-    def send(value: String) = {
+    def send(topic: String, value: String) = {
 		  val record = new ProducerRecord(topic, "DroneLog", value)
 	    val p = Promise[(RecordMetadata, Exception)]()
 	    
