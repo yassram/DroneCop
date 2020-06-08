@@ -1,7 +1,7 @@
 # DroneCop:
 <p align="center">
 <img src="/readme_images/logo.png" width=250px></img> <br>
-<strong>A drone service to help police make parking tickets using drones.</strong>
+<strong>A drone service to help the police make parking tickets using drones.</strong>
 
 </p>
 
