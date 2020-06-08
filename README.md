@@ -1,76 +1,172 @@
-# DroneCop
+# DroneCop:
+A drone service to help police systems make parking tickets using drones.
 
-## Consigne :
-Prestacop Poc
+## Prerequisites:
+Make sure to have :
+- `sbt` and `scala` ([installation guide](https://www.scala-lang.org/download/))
+- `docker` ([official website](https://www.docker.com)) 
 
-The typical architecture will have 5 component :
+## Installation:
+run `bridgeKafka` (only once)
+``` sh
+sh$ chmod +x requirements/bridgeKafka.sh
+sh$ ./requirements/bridgeKafka.sh
+```
 
-1) have small program simulating the drone and sending drone like data to your solution (see subject for details on a message). Your system will store message in a distributed ᵉstream making it available to the component 2 and 3.
+run `Zookeeper`
+``` sh
+sh$ chmod +x requirements/runZookeeper.sh
+sh$ ./requirements/runZookeeper.sh
+```
 
-/ 2) handle alert message from stream 
+run `runKafka`
+``` sh
+sh$ chmod +x requirements/runZookeeper.sh
+sh$ ./requirements/runZookeeper.sh
+```
 
-/ 3) store message in a distributed storage (ex: HDFS/S3)
+run `HDFS` server
+``` sh
+sh$ cd DistributedStorage/docker-hadoop2
+sh$ docker-compose -d up
+```
 
-4) analyse stored data with a distributed processing component (like spark). As a proof of your system capacity to analyse the store data answer 4 questions of your choice. (ex: is there more violation during the week or during week-end?)
+## Project architecture:
+This project is performed through small apps (services) communicating with each others.
 
-5) load the CSV file in you distributed storage component. This must be done (couple) of line by (couple) of line.
+* **DroneSimulator:** This program simulates a given number of flying drones by sending drone messges, violations and alerts (with a given refresh rate). These messages are added to a `DroneMessage` stream.
 
+* **DroneConsumer:** This program is the data's entry point. It reads drones' messages from the `DroneMessage` stream and allows us to apply any business processing. Theses processes can be defined later. Currently only alerts are sent to another stream (`AlertStream`) in order to be processed a soon as possible since the drone needs a human assistance.
 
-All component must be scalable and used in a scalable way. 
-For component 3) you may use kafka connect or its equivalent (kinesis firehose).
-Any code must be written in functional scala (compile to jvm on javascript doesn’t matter). Unless I accept it as an exception the keywords «for, while, return, var» are forbidden as well as importing anything mutable.
-One exception for now : if you want to display a number of received/stored… message or alert you may use the keyword.
+* **AlertConsumer:** This program reads from the `AlertStream` and sends a mail to ask from human assistance. (It's just an example of processes that can be applied)
+
+* **CSVProducer:** This program allows us to add old data (from police) to the new servers in order to improve statistics that can be used later to optimize the drones.. (streets with highest number of violations, time, ...). It reads each line of a given csv and process them using the same pipeline as `DroneSimulator` with `-1` as `droneId`. 
+
+* **StreamToHdfs:** This program saves data in the `DroneMessage`stream into `parquet` files in an `HDFS` each `delta_t` time.
+
+* **Reader:** This program generates simple analysis from data stored in the `HDFS`. This is only for demo purposes.
+
+### Visually:
+
+<img src="/readme_images/archi.png"></img>
+
+## Usage:
+After following installation instructions, go to the `MultiApp` directory then launch apps:
+
+### DroneConsumer:
+```sh
+sh$ sbt
+sbt:DroneCop> run
+Multiple main classes detected, select one to run:
+
+ [1] droneCop.AlertConsumer
+ [2] droneCop.CsvProducer
+ [3] droneCop.DroneConsumer
+ [4] droneCop.DroneSimulator
+ [5] droneCop.Reader
+ [6] droneCop.StreamToHDFS
  
+sbt:DroneCop> 3
+```
 
-For the project you should use a git repo, work of different members of the group should be visible in different commits.
-For submission you should send me an email with your git repo and the last commit hash  Late submission are accepted, minus 2 point per late day(s).
+### AlertConsumer:
+```sh
+sh$ sbt
+sbt:DroneCop> run mail_sender mail_sender_password mail_receiver
+Multiple main classes detected, select one to run:
 
-
+ [1] droneCop.AlertConsumer
+ [2] droneCop.CsvProducer
+ [3] droneCop.DroneConsumer
+ [4] droneCop.DroneSimulator
+ [5] droneCop.Reader
+ [6] droneCop.StreamToHDFS
  
-Once those 5 parts you can work on the optional part :
+sbt:DroneCop> 1
+```
+**mail_sender** is the email address used to send mail notifications.
 
-The optional part is quite open, the goal is for every group to work on something there are curious about or they find interesting for there CV. They can be done in the language of your choice unless you re using spark.
+**mail_sender_password** is the password of the email address used to send mail notifications.
+
+**mail_receiver** is the email of notifications' receiver.
+
+### StreamToHdfs:
+```sh
+sh$ sbt
+sbt:DroneCop> run trigger_time
+Multiple main classes detected, select one to run:
+
+ [1] droneCop.AlertConsumer
+ [2] droneCop.CsvProducer
+ [3] droneCop.DroneConsumer
+ [4] droneCop.DroneSimulator
+ [5] droneCop.Reader
+ [6] droneCop.StreamToHDFS
+ 
+sbt:DroneCop> 6
+```
+**trigger_time** is the time in seconds between two successive saves. (should be large enough to avoid saving files with small amount of data)
+
+**_Note:_** You can access to the web interfce of the `HDFS` at: http://localhost:9870/explorer.html#/
+
+### DroneSimulator:
+```sh
+sh$ sbt
+sbt:DroneCop> run number_of_drones drones_refresh_rate
+Multiple main classes detected, select one to run:
+
+ [1] droneCop.AlertConsumer
+ [2] droneCop.CsvProducer
+ [3] droneCop.DroneConsumer
+ [4] droneCop.DroneSimulator
+ [5] droneCop.Reader
+ [6] droneCop.StreamToHDFS
+ 
+sbt:DroneCop> 4
+```
+**number_of_drones** is the number of drones that will be simulated. `drone_Id`s will be set from `0 to number_of_drones - 1`
+
+**drones_refresh_rate** is the time in ms between 2 successive messages sent from the same drone.
+
+**_Note:_** alerts / violations are sent randomly with 1% of chances to have an alert.
+
+### CSVProducer:
+```sh
+sh$ sbt
+sbt:DroneCop> run csv_file_path
+Multiple main classes detected, select one to run:
+
+ [1] droneCop.AlertConsumer
+ [2] droneCop.CsvProducer
+ [3] droneCop.DroneConsumer
+ [4] droneCop.DroneSimulator
+ [5] droneCop.Reader
+ [6] droneCop.StreamToHDFS
+ 
+sbt:DroneCop> 2
+```
+**csv_file_path** is the path to the csv file to load.
 
 
-Here are some suggestion : 
+### Reader:
+```sh
+sh$ sbt
+sbt:DroneCop> run
+Multiple main classes detected, select one to run:
 
-1) project deployed on the cloud (azure, aws, gcp,…) using IaC like terraform.
-
-2) website using its dedicated db/queue to display every received alert (instead of a basic email/log/console print) 
-
-3) using docker and docker compose for the 5 component of the project
-
-4) once component 4 is done, using spark-notebook/zeppelin to generate charts
-
-5) using some dataviz or custom website to present the result of the spark analysis
-
-6) using an ml model and adding information in the message to achieve predictive maintenance of the drone.
-
-7) any idea you find relevant for the project if I validate it
-
-
-FAQ
+ [1] droneCop.AlertConsumer
+ [2] droneCop.CsvProducer
+ [3] droneCop.DroneConsumer
+ [4] droneCop.DroneSimulator
+ [5] droneCop.Reader
+ [6] droneCop.StreamToHDFS
+ 
+sbt:DroneCop> 5
+```
 
 
-	
-	
-Except when doing the cloud option everything can be written and deploy locally on your own computer (not distributed). The recommendation regarding not using distributed kafka/spark was only for the distributed option.  
-	
-	
-	
-Most student should focus on the basic components. A group can achieve a good mark (up to 16/20) without the optional part. The optional part is for the curious group which want to do more.
-	
-
-
-
-	
-	
-If you want the cloud option to be done 100% correct all the components apart from drone simulator and the CsvToStream should be running on the cloud.  
-	
-	
-	
-Student are quite free for the architecture. For instance one student ask to write a rest server by itself to receive the CSV data and it’s fine as long as csv is send (bunch) of line per (bunch) of line, and that it’s failproof. For the 2nd option (alert website) one would probably use extra streams or database…  
-	
-	
-	
-presentation should be done on the 7th/8th with slides for the context and the architecture, small demo. Given time for presentation is 10/12 minutes (without question)
+## Authors:
+- Yassir RAMDANI: yassir.ramdani@epita.fr
+- Mamoune EL HABBARI: mamoune.el-habbari@epita.fr
+- Amine HEFFAR: amine.heffar@epita.fr
+- Rayane AMROUCHE: rayane.amrouche@epita.fr
