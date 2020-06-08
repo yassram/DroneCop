@@ -41,9 +41,9 @@ This project is performed through small apps (services) communicating with each 
 
 * **DroneSimulator:** This program simulates a given number of flying drones by sending drone messges, violations and alerts (with a given refresh rate). These messages are added to a `DroneMessage` stream.
 
-* **DroneConsumer:** This program is the data's entry point. It reads drones' messages from the `DroneMessage` stream and allows us to apply any business processing. Theses processes can be defined later. Currently only alerts are sent to another stream (`AlertStream`) in order to be processed a soon as possible since the drone needs a human assistance.
+* **DroneConsumer:** This program is the data's entry point. It reads drones' messages from the `DroneMessage` stream and allows us to apply any business processing. These processes can be defined later. Currently only alerts are sent to another stream (`AlertStream`) in order to be processed as soon as possible since the drone needs human assistance.
 
-* **AlertConsumer:** This program reads from the `AlertStream` and sends a mail to ask from human assistance. (It's just an example of processes that can be applied)
+* **AlertConsumer:** This program reads from the `AlertStream` and sends a mail to ask for human assistance. (It's just an example of processes that can be applied)
 
 * **CSVProducer:** This program allows us to add old data (from police) to the new servers in order to improve statistics that can be used later to optimize the drones.. (streets with highest number of violations, time, ...). It reads each line of a given csv and process them using the same pipeline as `DroneSimulator` with `-1` as `droneId`. 
 
