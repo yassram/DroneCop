@@ -24,6 +24,12 @@ import spark.implicits._
 
 def main(args: Array[String]): Unit = {
 
+    if (args.length < 1) {
+        println("Please provide the triggerTime between 2 succesive saves to the HDFS.")
+    }
+
+    val triggerTime = args(0)
+
     val schemaforfile = new StructType()
             .add("drone_id", "integer")
             .add("timestamp", "string")
@@ -59,7 +65,7 @@ def main(args: Array[String]): Unit = {
         .option("parquet.block.size", 10240)
         // .partitionBy("window")
         // .option("truncate", False) 
-        .trigger(ProcessingTime("11 seconds"))
+        .trigger(ProcessingTime(s"$triggerTime seconds"))
         .start()
         .awaitTermination()
 
