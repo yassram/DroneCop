@@ -1,5 +1,10 @@
 # DroneCop:
-A drone service to help police systems make parking tickets using drones.
+<p align="center">
+<img src="/readme_images/logo.png" width=250px></img> <br>
+<strong>A drone service to help police make parking tickets using drones.</strong>
+
+</p>
+
 
 ## Prerequisites:
 Make sure to have :
