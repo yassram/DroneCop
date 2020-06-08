@@ -45,7 +45,6 @@ object DroneConsumer extends App {
       )
       if (drone.alert == 1) {
         msgFromDrone(drone.droneId, "Alert!")
-        msgFromDrone(drone.droneId, "Alert redirected to alert stream...")
         ProducerManager.send("AlertStream", d.value())
       } 
       println("---")

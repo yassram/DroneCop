@@ -47,11 +47,23 @@ object AlertConsumer extends App {
 
     val jsonUtils = new JsonUtils()
 
+    def msgFromDrone(droneId: Int, msg: String) {
+    println("> " + droneId.toString() + ": " + msg)
+    }
+
     while (true) {
       val records = consumerManager.poll(100)
       records.asScala.foreach { d =>
         val drone : DroneViolationJson = jsonUtils.json2Drone(d.value())
         println("Alert received from drone number " + drone.droneId)
+        msgFromDrone(
+          drone.droneId,
+          "📍 - lat:" + drone.lat + ", long:" + drone.long
+        )
+        msgFromDrone(
+          drone.droneId,
+          "❗ - Violation Code :" + drone.violationCode
+        )
         val content: Content = new Content()
           .text("This is an alert!\n")
           .html(

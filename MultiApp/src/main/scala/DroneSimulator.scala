@@ -42,9 +42,12 @@ object DroneSimulator {
       def run() = {
 
         // log foreach drone
-        drones.map { DroneMessage(_).toJsonString() }.foreach { ProducerManager.send("DroneStream", _) }
-        drones.map { DroneMessage(_).toJsonString() }.foreach { println(_) }
-
+        drones.map { DroneMessage(_).toJsonString() }.foreach {m =>
+          if (verbose) {
+            println(m)
+          }
+          ProducerManager.send("DroneStream", m)
+          }
       }
     }
     timer.schedule(task, 0, droneRefreshRate)
