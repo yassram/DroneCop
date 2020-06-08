@@ -7,12 +7,12 @@ import org.json4s.jackson.JsonMethods._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.streaming.Trigger._
 
-object stream {
+object StreamToHDFS {
 
 val conf = new SparkConf()
     .setAppName("StreamToHDFS")
     .setMaster(
-      "local[1]"
+      "local[*]"
     )
     
 val spark = SparkSession
