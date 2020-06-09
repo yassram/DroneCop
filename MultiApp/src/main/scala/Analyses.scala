@@ -25,7 +25,7 @@ object Reader extends App {
     val countAlerts = df.filter("alert != 0").count()
     
     val topState = df.filter("violation_code != -1").groupBy("plateState").count().withColumnRenamed("count","Number Violations").sort(desc("Number Violations")).limit(10)
-    val topDrone = df.filter("violation_code != -1 AND violation_code != 100").groupBy("drone_id").count().withColumnRenamed("count","Number Violations").sort(desc("Nbr Violations")).limit(1)
+    val topDrone = df.filter("violation_code != -1 AND violation_code != 100").groupBy("drone_id").count().withColumnRenamed("count","Number Violations").sort(desc("Number Violations")).limit(1)
     println("////////////////////////////////////////////:")
     
     println("Number of items: " + countItems + '\n')
