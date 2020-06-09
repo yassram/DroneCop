@@ -63,7 +63,7 @@ object CsvProducer extends App {
     fakeDrone.foreach { row =>
       val drone = DroneViolationJson(
       -1,                           // drone_id
-      -1,                           // alert
+      0,                           // alert
       "-1",                         // timestamp
       -1,                           // altitude
       0,0,                          // lat, long
@@ -79,8 +79,8 @@ object CsvProducer extends App {
       Option(row(5)).map(_.toString).getOrElse(""),            // vehicule make
       Option(row(6)).map(_.toString).getOrElse("")             // vehicule body
       )
-      println(drone)
-      ProducerManager.send("DroneStream", jsonUtils.drone2Json(drone))
+      println(drone.toJsonString())
+      ProducerManager.send("DroneStream", drone.toJsonString())
       Thread.sleep(500)
     }
 
